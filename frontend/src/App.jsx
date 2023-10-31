@@ -5,11 +5,15 @@ function App(props) {
   const [socket, setSocket] = useState(io(import.meta.env.VITE_GAME_SERVER));
 
   useEffect(() => {
-    socket.on('ping', onPing);
+    socket.on('get-pid', onGetPID);
+
+    return () => {
+      socket.off('get-pid', onGetPID);
+    }
   },[socket])
 
-  function onPing(){
-    console.log('pong');
+  function onGetPID(){
+    socket.emit('get-pid', props.playerID);
   }
   function pingServer(){
     console.log('Pinging server...');
@@ -19,7 +23,6 @@ function App(props) {
   return (
     <>
       <h1>{props.playerID}</h1>
-      <button onClick={pingServer}>PING SERVER</button>
     </>
   )
 }
