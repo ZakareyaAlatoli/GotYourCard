@@ -1,30 +1,39 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, createContext, useContext } from "react"
 import {io} from 'socket.io-client'
+import './App.css'
 
-function App(props) {
-  const [socket, setSocket] = useState(io(import.meta.env.VITE_GAME_SERVER));
+export default function App() {
+  const [socket, setSocket] = useState(io('ws://localhost:3000'));
+  const [userId, setUserId] = useState(localStorage.getItem('userId'));
+  const AppContext = createContext();
 
   useEffect(() => {
-    socket.on('get-pid', onGetPID);
-
-    return () => {
-      socket.off('get-pid', onGetPID);
+    if(!userId){
+      socket.emit('request-id');
     }
-  },[socket])
-
-  function onGetPID(){
-    socket.emit('get-pid', props.playerID);
-  }
-  function pingServer(){
-    console.log('Pinging server...');
-    socket.emit('ping');
-  }
+    else{
+      socket.emit('refresh-id', userId);
+    }
+    socket.on('reconnect', (attempt) => {
+      socket.emit('refresh-id', userId);
+    })
+    socket.on('receive-id', id => {
+      localStorage.setItem('userId', id);
+      setUserId(id);
+    })
+  },[]);
 
   return (
-    <>
-      <h1>{props.playerID}</h1>
-    </>
+    <AppContext.Provider value={
+      {
+        userId: userId
+      }
+    }>
+      {userId}
+    </AppContext.Provider>
   )
 }
 
-export default App
+export function useUser(){
+  return useContext(AppContext);
+}
