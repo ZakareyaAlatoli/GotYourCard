@@ -66,6 +66,9 @@ io.on('connection', socket => {
       socket.emit('receive-id', newId);
     }
   })
+  socket.on('set-name', name => {
+    socket.emit('set-name');
+  })
 })
 
 //TODO: maybe separate this from the game server?

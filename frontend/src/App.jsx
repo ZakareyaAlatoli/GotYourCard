@@ -8,10 +8,12 @@ import QuestionScreen from "./QuestionScreen";
 export const AppContext = createContext();
 
 
+
 export default function App() {
   //TODO: change to use env var
   const [socket, setSocket] = useState(io('ws://localhost:3000'));
   const [userId, setUserId] = useState(localStorage.getItem('userId'));
+  const [username, setUsername] = useState();
   const [screen, setScreen] = useState();
 
   useEffect(() => {
@@ -34,13 +36,16 @@ export default function App() {
     <AppContext.Provider value={
       {
         userId: userId,
-        setScreen
+        username: username,
+        socket: socket,
+        setScreen,
+        setUsername
       }
     }>
       <img
         width="100%"
         style={{ position: "absolute" }}
-        src="../public/placeholder_logo.jpg"
+        src="/images/placeholder_logo.jpg"
       />
       {
         screen === "LOBBY" ? <LobbyScreen /> : 
