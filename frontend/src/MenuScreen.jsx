@@ -5,49 +5,61 @@ import { screenTransitionTimeMs } from "./AppConstants";
 import LoadingIcon from "./LoadingIcon";
 
 export default function MenuScreen() {
-  const { userId, setScreen, username, setUsername, socket } = useContext(AppContext);
+  const { userId, setScreen, username, setUsername, socket, setRoom } = useContext(AppContext);
   const [position, setPosition] = useState("left");
-  const [loadingName, setLoadingName] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     socket.on('set-name', name => {
         setUsername(name);
-        setLoadingName(false);
+        setLoading(false);
     })
+    socket.on('create-room', room => {
+        setRoom(room);
+        goToScreen('LOBBY');
+    })
+
+
     window.requestAnimationFrame(() => {
         setPosition('center');
     })
     return () => {
         socket.removeAllListeners('set-name');
+        socket.removeAllListeners('create-room');
     }
   }, []);
 
-  function finish() {
+  function goToScreen(screen) {
     setPosition("right");
     setTimeout(() => {
-      setScreen("LOBBY");
+      setScreen(screen);
     }, screenTransitionTimeMs);
   }
 
-  function onSubmit(evt){
+  function submit(evt){
     evt.preventDefault();
     const formData = new FormData(evt.target);
     const values = Object.fromEntries(formData);
-    setLoadingName(true);
+    setLoading(true);
     socket.emit('set-name', userId, values.username);
+  }
+
+  function createRoom(){
+    socket.emit('create-room', userId);
   }
 
   return (
     <Container position={position} color="#0000FF44">
-      <button onClick={() => finish()}>Go to lobby, {userId}</button>
       {username ? <div>{username}</div> : null}
  
-      <form onSubmit={onSubmit} aria-disabled={!loadingName}>      
+      <form onSubmit={submit} aria-disabled={!loading}>      
         <input type="text" name="username"/>
         
         <button type="submit">Set Name</button>
-        {loadingName ? <LoadingIcon /> : null}
+        {loading ? <LoadingIcon /> : null}
       </form>
+      <button onClick={createRoom}>Create Game</button>
+      <button>Join Game</button>
     </Container>
   );
 }

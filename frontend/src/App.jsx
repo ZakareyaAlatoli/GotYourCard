@@ -14,11 +14,12 @@ export default function App() {
   const [socket, setSocket] = useState(io('ws://localhost:3000'));
   const [userId, setUserId] = useState(localStorage.getItem('userId'));
   const [username, setUsername] = useState();
+  const [room, setRoom] = useState({});
   const [screen, setScreen] = useState();
 
   useEffect(() => {
     if(!userId){
-      socket.emit('request-id');
+      socket.emit('set-id');
     }
     else{
       socket.emit('refresh-id', userId);
@@ -26,7 +27,7 @@ export default function App() {
     socket.on('reconnect', (attempt) => {
       socket.emit('refresh-id', userId);
     })
-    socket.on('receive-id', id => {
+    socket.on('set-id', id => {
       localStorage.setItem('userId', id);
       setUserId(id);
     })
@@ -39,7 +40,9 @@ export default function App() {
         username: username,
         socket: socket,
         setScreen,
-        setUsername
+        setUsername,
+        room,
+        setRoom
       }
     }>
       <img

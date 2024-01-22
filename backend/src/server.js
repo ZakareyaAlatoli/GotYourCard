@@ -4,7 +4,10 @@ const {
   generateUserId, 
   refreshUserId, 
   deleteIdleUserIds,
-  setUsername
+  setUsername,
+  createRoom,
+  getUsersById,
+  removeUserFromRoom
 } = require('./mongo');
 
 const server = createServer();
@@ -14,9 +17,9 @@ const io = new Server(server, {
 
 io.on('connection', socket => {
   //Listen for client messages
-  socket.on('request-id', async () => {
+  socket.on('set-id', async () => {
     const userId = await generateUserId();
-    socket.emit('receive-id', userId);
+    socket.emit('set-id', userId);
   });
   socket.on('refresh-id', async userId => {
     const {matchedCount} = await refreshUserId(userId);
@@ -28,6 +31,17 @@ io.on('connection', socket => {
   socket.on('set-name', async (userId, name) => {
     const username = await setUsername(userId, name);
     socket.emit('set-name', username);
+  })
+  socket.on('create-room', async userId => {
+    const room = await createRoom(userId);
+    socket.emit('create-room', room);
+  })
+  socket.on('get-users', async userIds => {
+    const users = await getUsersById(userIds);
+    socket.emit('get-users', users);
+  })
+  socket.on('leave-room', async userId => {
+    await removeUserFromRoom(userId);
   })
 })
 
