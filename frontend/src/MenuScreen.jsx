@@ -11,6 +11,7 @@ export default function MenuScreen() {
 
   useEffect(() => {
     socket.on('set-name', name => {
+        setUsername(name);
         setLoadingName(false);
     })
     window.requestAnimationFrame(() => {
@@ -33,8 +34,7 @@ export default function MenuScreen() {
     const formData = new FormData(evt.target);
     const values = Object.fromEntries(formData);
     setLoadingName(true);
-    socket.emit('set-name', values.username);
-    setUsername(values.username);
+    socket.emit('set-name', userId, values.username);
   }
 
   return (
