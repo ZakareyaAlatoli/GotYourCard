@@ -1,6 +1,6 @@
 .loading-icon {
     animation: loading-animation 0.5s linear infinite;
-    position: relative;
+    position: absolute;
     display: inline-block;
     --color: cyan;
     border-top: 5px solid white;
@@ -10,8 +10,9 @@
     width: 25px;
     height: 25px;
     border-radius: 50px;
-    left: 12.5px;
+    left: 1vw;
     top: 12.5px;
+    z-index: 2;
     box-shadow: 0px 0px 5px 5px var(--color)
 }
 

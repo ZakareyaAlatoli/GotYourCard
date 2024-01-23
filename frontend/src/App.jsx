@@ -4,6 +4,7 @@ import './App.css'
 import MenuScreen from "./MenuScreen";
 import LobbyScreen from "./LobbyScreen";
 import QuestionScreen from "./QuestionScreen";
+import LoadingIcon from "./LoadingIcon";
 
 export const AppContext = createContext();
 
@@ -16,6 +17,7 @@ export default function App() {
   const [username, setUsername] = useState();
   const [room, setRoom] = useState({});
   const [screen, setScreen] = useState();
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if(!userId){
@@ -31,6 +33,10 @@ export default function App() {
       localStorage.setItem('userId', id);
       setUserId(id);
     })
+    socket.on('error', error => {
+      setLoading(false);
+      console.error(error);
+    })
   },[]);
 
   return (
@@ -39,12 +45,15 @@ export default function App() {
         userId: userId,
         username: username,
         socket: socket,
+        loading,
+        setLoading,
         setScreen,
         setUsername,
         room,
         setRoom
       }
     }>
+      {loading?<LoadingIcon />:null}
       <img
         width="100%"
         style={{ position: "absolute" }}

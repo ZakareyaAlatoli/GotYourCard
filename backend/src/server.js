@@ -7,7 +7,8 @@ const {
   setUsername,
   createRoom,
   getUsersById,
-  removeUserFromRoom
+  removeUserFromRoom,
+  joinRoom
 } = require('./mongo');
 
 const server = createServer();
@@ -29,24 +30,51 @@ io.on('connection', socket => {
     }
   })
   socket.on('set-name', async (userId, name) => {
-    const username = await setUsername(userId, name);
-    socket.emit('set-name', username);
+    try{
+      const username = await setUsername(userId, name);
+      socket.emit('set-name', username);
+    }
+    catch(error){
+      socket.emit('error', error);
+    }
   })
   socket.on('create-room', async userId => {
     const room = await createRoom(userId);
     socket.emit('create-room', room);
   })
   socket.on('get-users', async userIds => {
-    const users = await getUsersById(userIds);
-    socket.emit('get-users', users);
+    try{
+      const users = await getUsersById(userIds);
+      socket.emit('get-users', users);
+    }
+    catch(error){
+      socket.emit('error', error);
+    }
   })
   socket.on('leave-room', async userId => {
-    await removeUserFromRoom(userId);
+    try{
+      await removeUserFromRoom(userId);
+    }
+    catch(error){
+      socket.emit('error', error);
+    }
+  })
+  socket.on('join-room', async (userId, roomId) => {
+    try{
+      const room = await joinRoom(userId, roomId);
+      socket.emit('join-room', room);
+    }
+    catch(error){
+      socket.emit('error', error);
+    }
   })
 })
 
 //TODO: maybe separate this from the game server?
+console.log('Purging idle accounts...');
+deleteIdleUserIds();
 setInterval(() => {
+  console.log('Purging idle accounts...');
   deleteIdleUserIds();
 }, 3_600_000);
 

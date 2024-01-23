@@ -11,7 +11,6 @@ export default function LobbyScreen() {
   useEffect(() => {
     socket.emit('get-users', room.memberUserIds);
     socket.on('get-users', users => {
-      console.log(users);
       setRoomMembers(users);
     })
 
