@@ -70,7 +70,7 @@ async function deleteIdleUserIds(){
     const roomId = expiredUser.roomId;
     await removeUserFromRoom(expiredUser._id);
   });
-  await usersCollection.deleteMany({_id: {$lte: date}});
+  await usersCollection.deleteMany({expireDate: {$lte: date}});
   
 }
 
@@ -80,7 +80,10 @@ async function removeUserFromRoom(userId){
     const roomsCollection = db.collection('rooms');
     const usersCollection = db.collection('users');
 
-    const {roomId} = await usersCollection.findOne({_id: new ObjectId(userId)});
+    const user = await usersCollection.findOne({_id: new ObjectId(userId)});
+    const roomId = user.roomId;
+    if(roomId == null)
+        return;
     await roomsCollection.updateOne({_id: new ObjectId(roomId)}, {
         $pull: { 'memberUserIds': new ObjectId(userId)}
     });
