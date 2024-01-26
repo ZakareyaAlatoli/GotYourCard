@@ -2,23 +2,22 @@ import React, { useState, useContext, useEffect } from "react";
 import { AppContext } from "./App";
 import Container from "./Container";
 import { screenTransitionTimeMs } from "./AppConstants";
+import useSocket from "./useSocket";
 
 export default function LobbyScreen() {
   const { userId, setScreen, room, socket } = useContext(AppContext);
   const [position, setPosition] = useState("left");
   const [roomMembers, setRoomMembers] = useState([]);
 
+  useSocket(socket, ['get-users', users => {
+    setRoomMembers(users);
+  }]);
+
   useEffect(() => {
     socket.emit('get-users', room?.memberUserIds);
-    socket.on('get-users', users => {
-      setRoomMembers(users);
-    })
     window.requestAnimationFrame(() => {
       setPosition('center');
     })
-    return () => {
-      socket.removeAllListeners('get-users');
-    }
   }, []);
 
   useEffect(() => {

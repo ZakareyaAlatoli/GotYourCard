@@ -2,6 +2,7 @@ import React, { useState, useContext, useEffect } from "react";
 import { AppContext } from "./App";
 import Container from "./Container";
 import { screenTransitionTimeMs } from "./AppConstants";
+import useSocket from "./useSocket";
 
 export default function MenuScreen() {
   const { 
@@ -17,17 +18,16 @@ export default function MenuScreen() {
   const [position, setPosition] = useState("left");
   const [joinFormOpen, setJoinFormOpen] = useState(false);
 
-  useEffect(() => {
-    socket.on('set-name', name => {
+  useSocket(socket, 
+    ['set-name', name => {
         setUsername(name);
         setLoading(false);
-    })
-    socket.on('create-room', room => {
+    }],
+    ['create-room', room => {
         setRoom(room);
         goToScreen('LOBBY');
-        setLoading(false);
-    })
-    socket.on('join-room', room => {
+    }],
+    ['join-room', room => {
         if(room){
             setRoom(room);
             goToScreen('LOBBY');
@@ -36,17 +36,13 @@ export default function MenuScreen() {
             console.error('Could not join room');
         }
         setLoading(false);
-    })
+    }]
+);
 
-
+  useEffect(() => {
     window.requestAnimationFrame(() => {
         setPosition('center');
     })
-    return () => {
-        socket.removeAllListeners('set-name');
-        socket.removeAllListeners('create-room');
-        socket.removeAllListeners('join-room');
-    }
   }, []);
 
   function goToScreen(screen) {
