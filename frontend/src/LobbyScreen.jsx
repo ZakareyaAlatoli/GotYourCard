@@ -9,11 +9,10 @@ export default function LobbyScreen() {
   const [roomMembers, setRoomMembers] = useState([]);
 
   useEffect(() => {
-    socket.emit('get-users', room.memberUserIds);
+    socket.emit('get-users', room?.memberUserIds);
     socket.on('get-users', users => {
       setRoomMembers(users);
     })
-
     window.requestAnimationFrame(() => {
       setPosition('center');
     })
@@ -21,6 +20,10 @@ export default function LobbyScreen() {
       socket.removeAllListeners('get-users');
     }
   }, []);
+
+  useEffect(() => {
+    socket.emit('get-users', room?.memberUserIds);
+  },[room])
 
   function goToScreen(screen) {
     setPosition("right");

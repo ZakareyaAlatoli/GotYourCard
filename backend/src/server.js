@@ -1,5 +1,6 @@
 const { createServer } = require('http');
 const { Server } = require('socket.io');
+const {ObjectId} = require('mongodb');
 const {
   generateUserId, 
   refreshUserId, 
@@ -7,6 +8,7 @@ const {
   setUsername,
   createRoom,
   getUsersById,
+  getRoomById,
   removeUserFromRoom,
   joinRoom
 } = require('./mongo');
@@ -22,11 +24,11 @@ io.on('connection', socket => {
     const userId = await generateUserId();
     socket.emit('set-id', userId);
   });
-  socket.on('refresh-id', async userId => {
+  socket.on('refresh', async userId => {
     const {matchedCount} = await refreshUserId(userId);
     if(matchedCount == 0){
       const newId = await generateUserId();
-      socket.emit('receive-id', newId);
+      socket.emit('set-id', newId);
     }
   })
   socket.on('set-name', async (userId, name) => {
@@ -40,6 +42,7 @@ io.on('connection', socket => {
   })
   socket.on('create-room', async userId => {
     const room = await createRoom(userId);
+    socket.join(room._id.toString());
     socket.emit('create-room', room);
   })
   socket.on('get-users', async userIds => {
@@ -53,16 +56,27 @@ io.on('connection', socket => {
   })
   socket.on('leave-room', async userId => {
     try{
+      const [user] = await getUsersById([userId]);
+      if(user == null)
+        throw('User does not exist');
       await removeUserFromRoom(userId);
+      const roomId = user?.roomId;
+      if(roomId){
+        socket.leave(roomId.toString());
+        const room = await getRoomById(roomId);
+        io.to(roomId.toString()).emit('room-change', room);
+      }
     }
     catch(error){
-      socket.emit('error', error);
+      socket.emit('error', 'Cannot leave room');
     }
   })
   socket.on('join-room', async (userId, roomId) => {
     try{
       const room = await joinRoom(userId, roomId);
+      socket.join(roomId);
       socket.emit('join-room', room);
+      io.to(roomId).emit('room-change', room);
     }
     catch(error){
       socket.emit('error', error);
@@ -71,8 +85,6 @@ io.on('connection', socket => {
 })
 
 //TODO: maybe separate this from the game server?
-console.log('Purging idle accounts...');
-deleteIdleUserIds();
 setInterval(() => {
   console.log('Purging idle accounts...');
   deleteIdleUserIds();

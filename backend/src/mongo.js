@@ -6,18 +6,20 @@ async function generateUserId(){
   const db = mongoClient.db();
   const usersCollection = db.collection('users');
   let expireDate = new Date();
-  expireDate.setSeconds(expireDate.getSeconds() + 30);
+  expireDate.setSeconds(expireDate.getMilliseconds + userTimeoutMs);
   const record = await usersCollection.insertOne({expireDate: expireDate});
   
   return record.insertedId;
 }
+
+const userTimeoutMs = 30_000;
 
 async function refreshUserId(userId){
   await mongoClient.connect();
   const db = mongoClient.db();
   const usersCollection = db.collection('users');
   let expireDate = new Date();
-  expireDate.setSeconds(expireDate.getSeconds() + 30);
+  expireDate.setSeconds(expireDate.getMilliseconds() + userTimeoutMs);
   const record = await usersCollection.updateOne({_id: new ObjectId(userId)},
   {$set: {expireDate: expireDate}});
   
@@ -37,12 +39,11 @@ async function createRoom(userId){
     await mongoClient.connect();
     const db = mongoClient.db();
     const roomsCollection = db.collection('rooms');
-    const {insertedId} = await roomsCollection.insertOne({memberUserIds: [new ObjectId(userId)]});
+    const {insertedId} = await roomsCollection.insertOne({phase: 'LOBBY', memberUserIds: [new ObjectId(userId)]});
     const usersCollection = db.collection('users');
     await usersCollection.updateOne({_id: new ObjectId(userId)}, 
     { $set: {roomId: insertedId}});
     const room = await roomsCollection.findOne({_id: insertedId});
-    
     return room;
 }
 
@@ -57,6 +58,15 @@ async function getUsersById(userIds){
     return result;
 }
 
+async function getRoomById(roomId){
+    await mongoClient.connect();
+    const db = mongoClient.db();
+    const roomsCollection = db.collection('rooms');
+    const result = await roomsCollection.findOne({_id: new ObjectId(roomId)});
+    
+    return result;
+}
+
 //This should be called at long intervals
 async function deleteIdleUserIds(){
   await mongoClient.connect();
@@ -67,7 +77,6 @@ async function deleteIdleUserIds(){
   const expiredUsers = await cursor.toArray();
 
   expiredUsers.forEach(async expiredUser => {
-    const roomId = expiredUser.roomId;
     await removeUserFromRoom(expiredUser._id);
   });
   await usersCollection.deleteMany({expireDate: {$lte: date}});
@@ -79,21 +88,21 @@ async function removeUserFromRoom(userId){
     const db = mongoClient.db();
     const roomsCollection = db.collection('rooms');
     const usersCollection = db.collection('users');
-
+    
     const user = await usersCollection.findOne({_id: new ObjectId(userId)});
-    const roomId = user.roomId;
+    const roomId = user?.roomId;
     if(roomId == null)
         return;
+    
     await roomsCollection.updateOne({_id: new ObjectId(roomId)}, {
-        $pull: { 'memberUserIds': new ObjectId(userId)}
+        $pull: { memberUserIds: new ObjectId(userId)}
     });
     await usersCollection.updateOne({_id: new ObjectId(userId)}, {
-        $set: {'roomId': null}
-    })
+        $set: {roomId: null}
+    });
     await roomsCollection.deleteMany({
         memberUserIds: {$size: 0}
     });
-    
 }
 
 async function joinRoom(userId, roomId){
@@ -101,9 +110,11 @@ async function joinRoom(userId, roomId){
     const db = mongoClient.db();
     const roomsCollection = db.collection('rooms');
     const usersCollection = db.collection('users');
-    await roomsCollection.updateOne({_id: new ObjectId(roomId)}, {
+    const record = await roomsCollection.updateOne({_id: new ObjectId(roomId)}, {
         $push: { 'memberUserIds': new ObjectId(userId)}
     });
+    if(record.modifiedCount == 0)
+        throw ('Room doesn\'t exist');
     await usersCollection.updateOne({_id: new ObjectId(userId)}, {
         $set: {'roomId': roomId}
     });
@@ -119,6 +130,7 @@ module.exports = {
     setUsername,
     createRoom,
     getUsersById,
+    getRoomById,
     removeUserFromRoom,
     joinRoom
 }

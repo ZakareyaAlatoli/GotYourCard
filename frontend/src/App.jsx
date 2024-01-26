@@ -21,17 +21,21 @@ export default function App() {
 
   useEffect(() => {
     if(!userId){
+      console.log('No id detected');
       socket.emit('set-id');
     }
     else{
-      socket.emit('refresh-id', userId);
+      socket.emit('refresh', userId);
     }
     socket.on('reconnect', (attempt) => {
-      socket.emit('refresh-id', userId);
+      socket.emit('refresh', userId);
     })
     socket.on('set-id', id => {
       localStorage.setItem('userId', id);
       setUserId(id);
+    })
+    socket.on('room-change', room => {
+      setRoom(room);
     })
     socket.on('error', error => {
       setLoading(false);
