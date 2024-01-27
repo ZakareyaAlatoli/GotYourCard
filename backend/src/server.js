@@ -1,6 +1,5 @@
 const { createServer } = require('http');
 const { Server } = require('socket.io');
-const {ObjectId} = require('mongodb');
 const {
   generateUserId, 
   refreshUserId, 
@@ -10,7 +9,8 @@ const {
   getUsersById,
   getRoomById,
   removeUserFromRoom,
-  joinRoom
+  joinRoom,
+  startGame
 } = require('./mongo');
 
 const server = createServer();
@@ -77,6 +77,21 @@ io.on('connection', socket => {
       socket.join(roomId);
       socket.emit('join-room', room);
       io.to(roomId).emit('room-change', room);
+    }
+    catch(error){
+      socket.emit('error', error);
+    }
+  })
+  socket.on('start-game', async (userId) => {
+    try{
+      const [user] = await getUsersById([userId]);
+      if(user == null)
+        throw('User does not exist');
+      const roomId = user?.roomId;
+      if(roomId){
+        await startGame(roomId);
+        io.to(roomId.toString()).emit('question-phase');
+      }
     }
     catch(error){
       socket.emit('error', error);

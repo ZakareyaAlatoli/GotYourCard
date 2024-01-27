@@ -2,26 +2,28 @@ import React, { useState, useContext, useEffect } from "react";
 import { AppContext } from "./App";
 import Container from "./Container";
 import { screenTransitionTimeMs } from "./AppConstants";
+import useSocket from "./useSocket";
 
 export default function QuestionScreen() {
-  const { userId, setScreen } = useContext(AppContext);
+  const { userId, setScreen, room, socket } = useContext(AppContext);
   const [position, setPosition] = useState("left");
 
   useEffect(() => {
     window.requestAnimationFrame(() => {
-        setPosition('center');
+      setPosition('center');
     })
   }, []);
 
-  function finish() {
+  function goToScreen(screen) {
     setPosition("right");
     setTimeout(() => {
-      setScreen();
+      setScreen(screen);
     }, screenTransitionTimeMs);
   }
+
   return (
-    <Container position={position} color="#00FF0044">
-      <button onClick={() => finish()}>Return to lobby, {userId}</button>
+    <Container position={position} color="#FF00FF44">
+      <h1>Question Phase</h1>
     </Container>
   );
 }

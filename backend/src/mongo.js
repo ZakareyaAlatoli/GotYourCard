@@ -111,7 +111,7 @@ async function joinRoom(userId, roomId){
     const roomsCollection = db.collection('rooms');
     const usersCollection = db.collection('users');
     const record = await roomsCollection.updateOne({_id: new ObjectId(roomId)}, {
-        $push: { 'memberUserIds': new ObjectId(userId)}
+        $push: { memberUserIds: new ObjectId(userId)}
     });
     if(record.modifiedCount == 0)
         throw ('Room doesn\'t exist');
@@ -123,6 +123,16 @@ async function joinRoom(userId, roomId){
     return room;
 }
 
+async function startGame(roomId){
+    await mongoClient.connect();
+    const db = mongoClient.db();
+    const roomsCollection = db.collection('rooms');  
+
+    const record = await roomsCollection.updateOne({_id: new ObjectId(roomId)}, {
+        $set: { phase: 'QUESTION'}
+    });
+}
+
 module.exports = {
     generateUserId,
     refreshUserId,
@@ -132,6 +142,7 @@ module.exports = {
     getUsersById,
     getRoomById,
     removeUserFromRoom,
-    joinRoom
+    joinRoom,
+    startGame
 }
 

@@ -9,9 +9,14 @@ export default function LobbyScreen() {
   const [position, setPosition] = useState("left");
   const [roomMembers, setRoomMembers] = useState([]);
 
-  useSocket(socket, ['get-users', users => {
-    setRoomMembers(users);
-  }]);
+  useSocket(socket, 
+    ['get-users', users => {
+      setRoomMembers(users);
+    }],
+    ['question-phase', () => {
+      goToScreen('QUESTION');
+    }]
+  );
 
   useEffect(() => {
     socket.emit('get-users', room?.memberUserIds);
@@ -31,6 +36,10 @@ export default function LobbyScreen() {
     }, screenTransitionTimeMs);
   }
 
+  function startGame(){
+    socket.emit('start-game', userId);
+  }
+
   function leaveRoom(){
     socket.emit('leave-room', userId);
     goToScreen(screen)
@@ -45,6 +54,7 @@ export default function LobbyScreen() {
           })
         }
       </ul>
+      <button onClick={startGame}>Start Game</button>
       <button onClick={leaveRoom}>Leave Room</button>
     </Container>
   );
