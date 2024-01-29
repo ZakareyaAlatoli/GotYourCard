@@ -4,6 +4,7 @@ import { ScreenContext } from "./Screen";
 import { Screens } from "./AppConstants";
 import Container from "./Container";
 import useSocket from "./useSocket";
+import Form from "./Form";
 
 export default function MenuScreen() {
   const { 
@@ -40,20 +41,14 @@ export default function MenuScreen() {
     }]
 );
 
-  function submitName(evt){
-    evt.preventDefault();
-    const formData = new FormData(evt.target);
-    const values = Object.fromEntries(formData);
+  function submitName({username}){
     setLoading(true);
-    socket.emit('set-name', userId, values.username);
+    socket.emit('set-name', userId, username);
   }
 
-  function submitRoomId(evt){
-    evt.preventDefault();
-    const formData = new FormData(evt.target);
-    const values = Object.fromEntries(formData);
+  function submitRoomId({roomId}){
     setLoading(true);
-    joinRoom(values.roomId);
+    joinRoom(roomId);
   }
 
   function createRoom(){
@@ -68,16 +63,16 @@ export default function MenuScreen() {
     <Container visible={visible} color="#0000FF44">
         {username ? <div>{username}</div> : null}
     
-        <form onSubmit={submitName} aria-disabled={!loading}>      
+        <Form onSubmit={submitName} aria-disabled={!loading}>      
             <input type="text" name="username"/>
             <button type="submit">Set Name</button>
-        </form>
+        </Form>
         <button onClick={createRoom}>Create Game</button>
         {joinFormOpen ?
-            <form onSubmit={submitRoomId} aria-disabled={!loading}>
+            <Form onSubmit={submitRoomId} aria-disabled={!loading}>
                 <input type="text" name="roomId"/>
                 <button type="submit">Enter Room Code</button>
-            </form>
+            </Form>
             : <button onClick={() => setJoinFormOpen(true)}>Join Game</button> 
         }
     </Container>

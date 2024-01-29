@@ -11,7 +11,8 @@ const {
   removeUserFromRoom,
   joinRoom,
   startGame,
-  getRoomByUserId
+  getRoomByUserId,
+  setQuestion
 } = require('./mongo');
 const {Screens} = require('./AppConstants');
 
@@ -20,6 +21,7 @@ const io = new Server(server, {
   cors: '*'
 });
 
+//TODO: should userId be validated every time a socket message is sent?
 io.on('connection', socket => {
   //Listen for client messages
   socket.on('set-id', async () => {
@@ -39,6 +41,7 @@ io.on('connection', socket => {
     //to the proper game state
     const existingRoom = await getRoomByUserId(userId);
     if(existingRoom){
+      socket.emit('room-players-change', existingRoom);
       socket.emit('set-screen', existingRoom.phase);
     }
   })
@@ -101,7 +104,6 @@ io.on('connection', socket => {
       io.to(roomId).emit('room-players-change', room);
     }
     catch(error){
-      console.error(error);
       socket.emit('error', error);
     }
   })
@@ -118,6 +120,15 @@ io.on('connection', socket => {
     }
     catch(error){
       socket.emit('error', error);
+    }
+  })
+  socket.on('set-question', async (userId, question) => {
+    try{
+      const askedQuestion = await setQuestion(userId, question);
+      socket.emit('set-question', askedQuestion);
+    }
+    catch(error){
+      socket.emit('error', 'Could not send question');
     }
   })
 })

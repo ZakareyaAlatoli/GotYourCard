@@ -146,6 +146,21 @@ async function startGame(roomId){
     });
 }
 
+async function setQuestion(userId, question){
+    await mongoClient.connect();
+    const db = mongoClient.db();
+    const questionsCollection = db.collection('questions');
+
+    await questionsCollection.updateOne({userId: new ObjectId(userId)}, 
+        {$set: {
+            userId: new ObjectId(userId),
+            question: question
+        }},
+        {upsert: true}
+    );
+    return question;
+}
+
 module.exports = {
     generateUserId,
     refreshUserId,
@@ -157,6 +172,7 @@ module.exports = {
     getRoomById,
     removeUserFromRoom,
     joinRoom,
-    startGame
+    startGame,
+    setQuestion
 }
 
