@@ -9,4 +9,6 @@ const Screens = {
 
 Object.freeze(Screens);
 
-export {Screens};
+module.exports = {
+    Screens
+};

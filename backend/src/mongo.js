@@ -1,5 +1,6 @@
 const {MongoClient, ObjectId} = require("mongodb");
 const mongoClient = new MongoClient('mongodb://127.0.0.1/gotyourcard');
+const {Screens} = require('./AppConstants');
 
 async function generateUserId(){
   await mongoClient.connect();
@@ -39,7 +40,7 @@ async function createRoom(userId){
     await mongoClient.connect();
     const db = mongoClient.db();
     const roomsCollection = db.collection('rooms');
-    const {insertedId} = await roomsCollection.insertOne({phase: 'LOBBY', memberUserIds: [new ObjectId(userId)]});
+    const {insertedId} = await roomsCollection.insertOne({phase: Screens.LOBBY, memberUserIds: [new ObjectId(userId)]});
     const usersCollection = db.collection('users');
     await usersCollection.updateOne({_id: new ObjectId(userId)}, 
     { $set: {roomId: insertedId}});
@@ -65,6 +66,18 @@ async function getRoomById(roomId){
     const result = await roomsCollection.findOne({_id: new ObjectId(roomId)});
     
     return result;
+}
+
+async function getRoomByUserId(userId){
+    await mongoClient.connect();
+    const db = mongoClient.db();
+    const roomsCollection = db.collection('rooms');
+    const usersCollection = db.collection('users');
+
+    const user = await usersCollection.findOne({_id: new ObjectId(userId)});
+    const room = await roomsCollection.findOne({_id: user.roomId});
+
+    return room;
 }
 
 //This should be called at long intervals
@@ -140,6 +153,7 @@ module.exports = {
     setUsername,
     createRoom,
     getUsersById,
+    getRoomByUserId,
     getRoomById,
     removeUserFromRoom,
     joinRoom,

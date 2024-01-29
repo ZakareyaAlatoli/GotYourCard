@@ -1,14 +1,11 @@
 import { useEffect, useState, createContext, useContext } from "react"
 import {io} from 'socket.io-client'
 import './App.css'
-import MenuScreen from "./MenuScreen";
-import LobbyScreen from "./LobbyScreen";
-import QuestionScreen from "./QuestionScreen";
+import Screen from "./Screen";
 import LoadingIcon from "./LoadingIcon";
+import useSocket from "./useSocket";
 
 export const AppContext = createContext();
-
-
 
 export default function App() {
   //TODO: change to use env var
@@ -16,7 +13,6 @@ export default function App() {
   const [userId, setUserId] = useState(localStorage.getItem('userId'));
   const [username, setUsername] = useState();
   const [room, setRoom] = useState({});
-  const [screen, setScreen] = useState();
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -34,12 +30,15 @@ export default function App() {
       localStorage.setItem('userId', id);
       setUserId(id);
     })
-    socket.on('room-change', room => {
+    socket.on('room-players-change', room => {
       setRoom(room);
     })
     socket.on('error', error => {
       setLoading(false);
       console.error(error);
+    })
+    socket.on('set-name', name => {
+      setUsername(name);
     })
   },[]);
 
@@ -51,7 +50,6 @@ export default function App() {
         socket: socket,
         loading,
         setLoading,
-        setScreen,
         setUsername,
         room,
         setRoom
@@ -63,11 +61,7 @@ export default function App() {
         style={{ position: "absolute" }}
         src="/images/placeholder_logo.jpg"
       />
-      {
-        screen === "LOBBY" ? <LobbyScreen /> : 
-        screen === "QUESTION" ? <QuestionScreen /> :
-        <MenuScreen />
-      }
+      <Screen />
     </AppContext.Provider>
   )
 }

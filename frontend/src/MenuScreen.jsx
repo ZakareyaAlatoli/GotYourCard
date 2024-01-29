@@ -1,13 +1,13 @@
 import React, { useState, useContext, useEffect } from "react";
 import { AppContext } from "./App";
+import { ScreenContext } from "./Screen";
+import { Screens } from "./AppConstants";
 import Container from "./Container";
-import { screenTransitionTimeMs } from "./AppConstants";
 import useSocket from "./useSocket";
 
 export default function MenuScreen() {
   const { 
     userId, 
-    setScreen, 
     username, 
     setUsername, 
     socket, 
@@ -15,7 +15,8 @@ export default function MenuScreen() {
     loading,
     setLoading
   } = useContext(AppContext);
-  const [position, setPosition] = useState("left");
+
+  const {goToScreen, visible} = useContext(ScreenContext);
   const [joinFormOpen, setJoinFormOpen] = useState(false);
 
   useSocket(socket, 
@@ -25,12 +26,12 @@ export default function MenuScreen() {
     }],
     ['create-room', room => {
         setRoom(room);
-        goToScreen('LOBBY');
+        goToScreen(Screens.LOBBY);
     }],
     ['join-room', room => {
         if(room){
             setRoom(room);
-            goToScreen('LOBBY');
+            goToScreen(Screens.LOBBY);
         }
         else{
             console.error('Could not join room');
@@ -38,19 +39,6 @@ export default function MenuScreen() {
         setLoading(false);
     }]
 );
-
-  useEffect(() => {
-    window.requestAnimationFrame(() => {
-        setPosition('center');
-    })
-  }, []);
-
-  function goToScreen(screen) {
-    setPosition("right");
-    setTimeout(() => {
-      setScreen(screen);
-    }, screenTransitionTimeMs);
-  }
 
   function submitName(evt){
     evt.preventDefault();
@@ -77,7 +65,7 @@ export default function MenuScreen() {
   }
 
   return (
-    <Container position={position} color="#0000FF44">
+    <Container visible={visible} color="#0000FF44">
         {username ? <div>{username}</div> : null}
     
         <form onSubmit={submitName} aria-disabled={!loading}>      

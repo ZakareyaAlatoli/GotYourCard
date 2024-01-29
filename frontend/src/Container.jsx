@@ -1,13 +1,15 @@
-import React from "react";
-import { screenTransitionTimeMs } from "./AppConstants";
+import React, {useContext, useEffect} from "react";
+import { ScreenContext } from "./Screen";
 
-export default function Container({ children, position, color }) {
+export default function Container({ children, visible, color }) {
+  const {transitionTime} = useContext(ScreenContext);
+
   return (
     <div
       style={{
         padding: "20px",
         position: "fixed",
-        transition: `right ${screenTransitionTimeMs}ms`,
+        transition: `right ${transitionTime}ms`,
         textAlign: "center",
         backgroundImage: `linear-gradient(
           to right,
@@ -18,12 +20,7 @@ export default function Container({ children, position, color }) {
         )`,
         width: "300vw",
         height: "100vh",
-        right:
-          position === "left"
-            ? "200vw"
-            : position === "center"
-            ? "-100vw"
-            : "-300vw",
+        right: visible ? "-100vw" : "300vw"
       }}
     >
       {children}
