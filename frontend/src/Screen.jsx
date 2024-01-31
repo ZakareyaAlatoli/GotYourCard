@@ -16,7 +16,6 @@ export default function Screen(){
     const {socket} = useContext(AppContext);
 
     useSocket(socket, ['set-screen', screen => {
-        console.log(screen);
         goToScreen(screen);
     }]);
 

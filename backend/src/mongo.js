@@ -81,20 +81,6 @@ module.exports.getRoomByUserId = async function(userId){
 }
 
 //This should be called at long intervals
-module.exports.deleteIdleUserIds = async function(){
-  await mongoClient.connect();
-  const db = mongoClient.db();
-  const usersCollection = db.collection('users');
-  const date = new Date();
-  const cursor = usersCollection.find({expireDate: {$lte: date}});
-  const expiredUsers = await cursor.toArray();
-
-  expiredUsers.forEach(async expiredUser => {
-    await removeUserFromRoom(expiredUser._id);
-  });
-  await usersCollection.deleteMany({expireDate: {$lte: date}});
-  
-}
 
 module.exports.removeUserFromRoom = async function(userId){
     await mongoClient.connect();
@@ -118,6 +104,21 @@ module.exports.removeUserFromRoom = async function(userId){
     });
 }
 
+module.exports.deleteIdleUserIds = async function(){
+  await mongoClient.connect();
+  const db = mongoClient.db();
+  const usersCollection = db.collection('users');
+  const date = new Date();
+  const cursor = usersCollection.find({expireDate: {$lte: date}});
+  const expiredUsers = await cursor.toArray();
+
+  expiredUsers.forEach(async expiredUser => {
+    await module.exports.removeUserFromRoom(expiredUser._id);
+  });
+  await usersCollection.deleteMany({expireDate: {$lte: date}});
+  
+}
+
 module.exports.joinRoom = async function(userId, roomId){
     await mongoClient.connect();
     const db = mongoClient.db();
@@ -129,7 +130,7 @@ module.exports.joinRoom = async function(userId, roomId){
     if(record.modifiedCount == 0)
         throw ('Room doesn\'t exist');
     await usersCollection.updateOne({_id: new ObjectId(userId)}, {
-        $set: {'roomId': roomId}
+        $set: {'roomId': new ObjectId(roomId)}
     });
     const room = await roomsCollection.findOne({_id: new ObjectId(roomId)});
     

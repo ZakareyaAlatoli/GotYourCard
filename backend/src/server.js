@@ -122,7 +122,20 @@ io.on('connection', socket => {
       }
     }
     catch(error){
+      console.error(error);
       socket.emit('error', 'Could not send question');
+    }
+  })
+  socket.on('get-questions', async (userId) => {
+    try{
+      const {_id} = await mongo.getRoomByUserId(userId);
+      const questions = await mongo.getQuestionsByRoomId(_id.toString());
+      console.log(questions);
+      socket.emit('get-questions', questions);
+    }
+    catch(error){
+      console.error(error);
+      socket.emit('error', error);
     }
   })
 })
