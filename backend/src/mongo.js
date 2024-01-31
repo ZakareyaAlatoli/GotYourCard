@@ -2,7 +2,7 @@ const {MongoClient, ObjectId} = require("mongodb");
 const mongoClient = new MongoClient('mongodb://127.0.0.1/gotyourcard');
 const {Screens} = require('./AppConstants');
 
-async function generateUserId(){
+module.exports.generateUserId = async function(){
   await mongoClient.connect();
   const db = mongoClient.db();
   const usersCollection = db.collection('users');
@@ -15,7 +15,7 @@ async function generateUserId(){
 
 const userTimeoutMs = 30_000;
 
-async function refreshUserId(userId){
+module.exports.refreshUserId = async function(userId){
   await mongoClient.connect();
   const db = mongoClient.db();
   const usersCollection = db.collection('users');
@@ -27,7 +27,7 @@ async function refreshUserId(userId){
   return record;
 }
 
-async function setUsername(userId, username){
+module.exports.setUsername = async function(userId, username){
     await mongoClient.connect();
     const db = mongoClient.db();
     const usersCollection = db.collection('users');
@@ -36,7 +36,7 @@ async function setUsername(userId, username){
     return username;
 }
 
-async function createRoom(userId){
+module.exports.createRoom = async function(userId){
     await mongoClient.connect();
     const db = mongoClient.db();
     const roomsCollection = db.collection('rooms');
@@ -48,7 +48,7 @@ async function createRoom(userId){
     return room;
 }
 
-async function getUsersById(userIds){
+module.exports.getUsersById = async function(userIds){
     await mongoClient.connect();
     const db = mongoClient.db();
     const usersCollection = db.collection('users');
@@ -59,7 +59,7 @@ async function getUsersById(userIds){
     return result;
 }
 
-async function getRoomById(roomId){
+module.exports.getRoomById = async function (roomId){
     await mongoClient.connect();
     const db = mongoClient.db();
     const roomsCollection = db.collection('rooms');
@@ -68,7 +68,7 @@ async function getRoomById(roomId){
     return result;
 }
 
-async function getRoomByUserId(userId){
+module.exports.getRoomByUserId = async function(userId){
     await mongoClient.connect();
     const db = mongoClient.db();
     const roomsCollection = db.collection('rooms');
@@ -81,7 +81,7 @@ async function getRoomByUserId(userId){
 }
 
 //This should be called at long intervals
-async function deleteIdleUserIds(){
+module.exports.deleteIdleUserIds = async function(){
   await mongoClient.connect();
   const db = mongoClient.db();
   const usersCollection = db.collection('users');
@@ -96,7 +96,7 @@ async function deleteIdleUserIds(){
   
 }
 
-async function removeUserFromRoom(userId){
+module.exports.removeUserFromRoom = async function(userId){
     await mongoClient.connect();
     const db = mongoClient.db();
     const roomsCollection = db.collection('rooms');
@@ -118,7 +118,7 @@ async function removeUserFromRoom(userId){
     });
 }
 
-async function joinRoom(userId, roomId){
+module.exports.joinRoom = async function(userId, roomId){
     await mongoClient.connect();
     const db = mongoClient.db();
     const roomsCollection = db.collection('rooms');
@@ -136,17 +136,37 @@ async function joinRoom(userId, roomId){
     return room;
 }
 
-async function startGame(roomId){
+module.exports.setRoomPhase = async function(roomId, phase){
+    await mongoClient.connect();
+    const db = mongoClient.db();
+    const roomsCollection = db.collection('rooms');
+
+    await roomsCollection.updateOne({_id: new ObjectId(roomId)}, {
+        $set: {'phase': phase}
+    });
+}
+
+module.exports.startGame = async function(roomId){
     await mongoClient.connect();
     const db = mongoClient.db();
     const roomsCollection = db.collection('rooms');  
 
-    const record = await roomsCollection.updateOne({_id: new ObjectId(roomId)}, {
-        $set: { phase: 'QUESTION'}
-    });
+    await this.setRoomPhase(roomId, Screens.QUESTION);
 }
 
-async function setQuestion(userId, question){
+module.exports.getQuestionsByRoomId = async function(roomId){
+    await mongoClient.connect();
+    const db = mongoClient.db();
+    const questionsCollection = db.collection('questions');
+
+    const {memberUserIds} = await module.exports.getRoomById(roomId);
+    const cursor = questionsCollection.find({userId: {$in: memberUserIds}});
+    const questions = await cursor.toArray();
+
+    return questions;
+}
+
+module.exports.setQuestion = async function(userId, question){
     await mongoClient.connect();
     const db = mongoClient.db();
     const questionsCollection = db.collection('questions');
@@ -158,21 +178,7 @@ async function setQuestion(userId, question){
         }},
         {upsert: true}
     );
-    return question;
-}
 
-module.exports = {
-    generateUserId,
-    refreshUserId,
-    deleteIdleUserIds,
-    setUsername,
-    createRoom,
-    getUsersById,
-    getRoomByUserId,
-    getRoomById,
-    removeUserFromRoom,
-    joinRoom,
-    startGame,
-    setQuestion
+    return question;
 }
 

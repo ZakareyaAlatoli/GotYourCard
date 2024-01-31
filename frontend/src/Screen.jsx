@@ -2,6 +2,7 @@ import React, {createContext, useContext, useEffect, useState} from "react";
 import MenuScreen from "./MenuScreen";
 import LobbyScreen from "./LobbyScreen";
 import QuestionScreen from "./QuestionScreen";
+import AnswerScreen from "./AnswerScreen.jsx";
 import { Screens } from "./AppConstants";
 import { AppContext } from "./App";
 import useSocket from "./useSocket";
@@ -16,7 +17,7 @@ export default function Screen(){
 
     useSocket(socket, ['set-screen', screen => {
         console.log(screen);
-        setScreen(screen);
+        goToScreen(screen);
     }]);
 
     function goToScreen(screen) {
@@ -38,6 +39,7 @@ export default function Screen(){
             {
                 screen === Screens.LOBBY ? <LobbyScreen /> : 
                 screen === Screens.QUESTION ? <QuestionScreen /> :
+                screen === Screens.ANSWER ? <AnswerScreen /> :
                 <MenuScreen />
             }       
         </ScreenContext.Provider>
