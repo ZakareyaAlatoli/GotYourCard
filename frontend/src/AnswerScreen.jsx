@@ -12,7 +12,6 @@ export default function AnswerScreen() {
 
   useSocket(socket, ['get-questions', newQuestions => {
     setQuestions(newQuestions);
-    setLoading(false);
   }]);
 
     useEffect(() => {
@@ -20,17 +19,35 @@ export default function AnswerScreen() {
         socket.emit('get-questions', userId);
     },[])
 
+    function submit(values){
+        let answers = [];
+        let completed = true;
+        Object.entries(values).forEach(([key, value])=>{
+            if(!value){
+                alert('You must answer all questions!');
+                completed = false;
+                return;
+            }
+            answers.push({
+                questionId: key,
+                answer: value
+            });
+        })
+        if(completed)
+            socket.emit('set-answers', userId, answers);
+    }
+
   return (
     <Container visible={visible} color="#FFFF0044">
       <h1>Answer Phase</h1>
-        <Form>
+        <Form onSubmit={submit}>
             {
                 questions?.map(question => {
                     if(userId != question.userId){
                         return(
                             <>
-                                <label key={question.userId}>{question.question}
-                                    <input key={question.userId} type='text' name={question.userId} />
+                                <label key={question._id}>{question.question}
+                                    <input key={question._id} type='text' name={question._id} />
                                 </label>
                                 
                             </>
@@ -38,6 +55,7 @@ export default function AnswerScreen() {
                     }
                 })
             }
+            <button type="submit">Submit</button>
         </Form>
     </Container>
   );

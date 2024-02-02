@@ -3,6 +3,8 @@ import MenuScreen from "./MenuScreen";
 import LobbyScreen from "./LobbyScreen";
 import QuestionScreen from "./QuestionScreen";
 import AnswerScreen from "./AnswerScreen.jsx";
+import MatchScreen from "./MatchScreen.jsx";
+import ResultsScreen from "./ResultsScreen.jsx";
 import { Screens } from "./AppConstants";
 import { AppContext } from "./App";
 import useSocket from "./useSocket";
@@ -39,6 +41,8 @@ export default function Screen(){
                 screen === Screens.LOBBY ? <LobbyScreen /> : 
                 screen === Screens.QUESTION ? <QuestionScreen /> :
                 screen === Screens.ANSWER ? <AnswerScreen /> :
+                screen === Screens.MATCH ? <MatchScreen /> :
+                screen === Screens.RESULTS ? <ResultsScreen /> :
                 <MenuScreen />
             }       
         </ScreenContext.Provider>

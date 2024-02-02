@@ -183,3 +183,55 @@ module.exports.setQuestion = async function(userId, question){
     return question;
 }
 
+module.exports.getAnswersByRoomId = async function(roomId){
+    await mongoClient.connect();
+    const db = mongoClient.db();
+    const answersCollection = db.collection('answers');
+
+    const {memberUserIds} = await module.exports.getRoomById(roomId);
+    const cursor = answersCollection.find({userId: {$in: memberUserIds}});
+    const answers = await cursor.toArray();
+
+    return answers;
+}
+
+module.exports.setAnswers = async function(userId, answers){
+    await mongoClient.connect();
+    const db = mongoClient.db();
+    const answersCollection = db.collection('answers');
+
+    await answersCollection.updateOne({userId: new ObjectId(userId)}, 
+        {$set: {
+            userId: new ObjectId(userId),
+            answers: answers
+        }},
+        {upsert: true}
+    );   
+}
+
+module.exports.getMatchesByRoomId = async function(roomId){
+    await mongoClient.connect();
+    const db = mongoClient.db();
+    const matchesCollection = db.collection('matches');
+
+    const {memberUserIds} = await module.exports.getRoomById(roomId);
+    const cursor = matchesCollection.find({userId: {$in: memberUserIds}});
+    const matches = await cursor.toArray();
+
+    return matches;
+}
+
+module.exports.setMatches = async function(userId, matches){
+    await mongoClient.connect();
+    const db = mongoClient.db();
+    const matchesCollection = db.collection('matches');
+
+    await matchesCollection.updateOne({userId: new ObjectId(userId)}, 
+        {$set: {
+            userId: new ObjectId(userId),
+            matches: matches
+        }},
+        {upsert: true}
+    );   
+}
+

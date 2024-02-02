@@ -39,6 +39,7 @@ io.on('connection', socket => {
       socket.emit('set-name', username);
     }
     catch(error){
+      console.error(error);
       socket.emit('error', error);
     }
   })
@@ -52,6 +53,7 @@ io.on('connection', socket => {
       socket.emit('create-room', room);
     }
     catch(error){
+      console.error(error);
       socket.emit('error', 'Cannot create room');
     }
   })
@@ -61,6 +63,7 @@ io.on('connection', socket => {
       socket.emit('get-users', users);
     }
     catch(error){
+      console.error(error);
       socket.emit('error', error);
     }
   })
@@ -78,6 +81,7 @@ io.on('connection', socket => {
       }
     }
     catch(error){
+      console.error(error);
       socket.emit('error', 'Cannot leave room');
     }
   })
@@ -92,6 +96,7 @@ io.on('connection', socket => {
       io.to(roomId).emit('room-players-change', room);
     }
     catch(error){
+      console.error(error);
       socket.emit('error', error);
     }
   })
@@ -107,6 +112,7 @@ io.on('connection', socket => {
       }
     }
     catch(error){
+      console.error(error);
       socket.emit('error', error);
     }
   })
@@ -130,8 +136,50 @@ io.on('connection', socket => {
     try{
       const {_id} = await mongo.getRoomByUserId(userId);
       const questions = await mongo.getQuestionsByRoomId(_id.toString());
-      console.log(questions);
       socket.emit('get-questions', questions);
+    }
+    catch(error){
+      console.error(error);
+      socket.emit('error', error);
+    }
+  })
+  socket.on('set-answers', async (userId, answers) => {
+    try{
+      await mongo.setAnswers(userId, answers);
+      socket.emit('set-answers');
+      const room = await mongo.getRoomByUserId(userId);
+      const roomAnswers = await mongo.getAnswersByRoomId(room._id.toString());
+      if(room.memberUserIds.length == roomAnswers.length){
+        await mongo.setRoomPhase(room._id.toString(), Screens.MATCH);
+        io.to(room._id.toString()).emit('set-screen', Screens.MATCH);
+      }
+    }
+    catch(error){
+      console.error(error);
+      socket.emit('error', error);
+    }
+  })
+  socket.on('get-answers', async (userId) => {
+    try{
+      const {_id} = await mongo.getRoomByUserId(userId);
+      const answers = await mongo.getAnswersByRoomId(_id.toString());
+      socket.emit('get-answers', answers);
+    }
+    catch(error){
+      console.error(error);
+      socket.emit('error', error);
+    }
+  })
+  socket.on('set-matches', async (userId, matches) => {
+    try{
+      await mongo.setMatches(userId, matches);
+      socket.emit('set-matches');
+      const room = await mongo.getRoomByUserId(userId);
+      const roomMatches = await mongo.getMatchesByRoomId(room._id.toString());
+      if(room.memberUserIds.length == roomMatches.length){
+        await mongo.setRoomPhase(room._id.toString(), Screens.RESULTS);
+        io.to(room._id.toString()).emit('set-screen', Screens.RESULTS);
+      }
     }
     catch(error){
       console.error(error);
