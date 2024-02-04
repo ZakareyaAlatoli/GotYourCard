@@ -79,6 +79,7 @@ io.on('connection', socket => {
         const room = await mongo.getRoomById(roomId);
         io.to(roomId.toString()).emit('room-players-change', room);
       }
+      socket.emit('set-screen', Screens.MENU);
     }
     catch(error){
       console.error(error);
@@ -186,12 +187,40 @@ io.on('connection', socket => {
       socket.emit('error', error);
     }
   })
+  socket.on('get-matches', async (userId) => {
+    try{
+      const {_id} = await mongo.getRoomByUserId(userId);
+      const matches = await mongo.getMatchesByRoomId(_id.toString());
+      socket.emit('get-matches', matches);
+    }
+    catch(error){
+      console.error(error);
+      socket.emit('error', error);
+    }
+  })
+  socket.on('get-results', async (userId) => {
+    try{
+      const {_id} = await mongo.getRoomByUserId(userId);
+      let results = await mongo.getResultsByRoomId(_id.toString());
+      if(results == null){
+        console.log('Creating new results');
+        await mongo.setResults(_id.toString());
+      }
+        
+      results = await mongo.getResultsByRoomId(_id.toString());
+      socket.emit('get-results', results);
+    }
+    catch(error){
+      console.error(error);
+      socket.emit('error', error);
+    }
+  })
 })
 
 //TODO: maybe separate this from the game server?
 setInterval(() => {
   console.log('Purging idle accounts...');
-  mongo.deleteIdleUserIds();
+  //mongo.deleteIdleUserIds();
 }, 3_600_000);
 
 server.listen(process.env.PORT || 3000);

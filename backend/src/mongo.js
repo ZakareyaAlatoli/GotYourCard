@@ -235,3 +235,91 @@ module.exports.setMatches = async function(userId, matches){
     );   
 }
 
+module.exports.getResultsByRoomId = async function(roomId){
+    await mongoClient.connect();
+    const db = mongoClient.db();
+    const resultsCollection = db.collection('results');
+
+    let results = await resultsCollection.findOne({roomId: new ObjectId(roomId)});
+    return results;
+}
+
+module.exports.resetRoom = async function(roomId){
+    await mongoClient.connect();
+    const db = mongoClient.db();
+    //question, answers, matches
+    const room = await module.exports.getRoomById(roomId);
+    const ids = room.memberUserIds.map(memberUserId => new ObjectId(memberUserId));
+    
+    await db.collection('questions').deleteMany({
+        userId: {$in: ids}
+    })
+    await db.collection('answers').deleteMany({
+        userId: {$in: ids}
+    })
+    await db.collection('matches').deleteMany({
+        userId: {$in: ids}
+    })
+}
+
+module.exports.setResults = async function(roomId){
+    await mongoClient.connect();
+    const db = mongoClient.db();
+    const room = await module.exports.getRoomById(roomId);
+    const users = await module.exports.getUsersById(room.memberUserIds.map(id => id.toString()));
+
+    let results = {};
+    users.forEach(user => {
+        results[user._id] = {
+            points: 0,
+            name: user.name
+        }
+    })
+
+    const questions = await module.exports.getQuestionsByRoomId(roomId);
+    const answers = await module.exports.getAnswersByRoomId(roomId);
+    questions.forEach(question => { 
+        results[question.userId].question = question.question;
+        results[question.userId].answers = [];
+        const questionId = question._id;
+        answers.forEach(answer => {
+            const answererId = answer.userId;
+            answer.answers.forEach(specificAnswer => {
+                if(specificAnswer.questionId == questionId){
+                    results[question.userId].answers.push({
+                        _id: answer._id,
+                        answererId: answererId,
+                        answer: specificAnswer.answer
+                    })
+                }
+            })
+        })
+    })
+    const matches = await module.exports.getMatchesByRoomId(roomId);
+    matches.forEach(match => {
+        //TODO: find out who gave match.answerId
+        //match.userId is the person who guessed gave the corresponding answerId
+        //Check if match.askerId == the person who has the answerId. If so, that's a correct match
+        const currentUserId = match.userId;
+        match.matches.forEach(specificMatch => {
+            const assumedId = specificMatch.askerId;
+            //Get actual userId of person who gave specifiMatch.answerId
+            const actualId = answers.filter(answer => {
+                return answer._id == specificMatch.answerId;
+            })[0].userId;
+            if(assumedId == actualId){
+                results[currentUserId].points += 1;
+            }
+        })
+    })
+    const resultsCollection = db.collection('results');
+    await resultsCollection.updateOne({roomId: new ObjectId(roomId)},
+        {$set: {
+            roomId: new ObjectId(roomId),
+            userData: results
+        }},
+        {upsert: true}
+    );
+    await module.exports.resetRoom(roomId);
+}
+
