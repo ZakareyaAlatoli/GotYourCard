@@ -22,7 +22,7 @@ export default function ResultsScreen() {
     )
 
     return (
-        <Container visible={visible} color="#FF440044">
+        <Container visible={visible} color="#FF440088">
             <h1>Results</h1>
             <h2>Scores</h2>
             {
@@ -34,12 +34,13 @@ export default function ResultsScreen() {
                 })
                 : null
             }
+            <h2>Questions</h2>
             {
                 results.userData ? 
                 Object.keys(results.userData).map((userId) => {
                     return (
                         <>
-                            <h2 key={userId}>{results.userData[userId].name} asked "{results.userData[userId].question}"</h2>
+                            <p key={userId}>{results.userData[userId].name} asked "{results.userData[userId].question}"</p>
                             {
                                 results.userData[userId].answers.map(answer => {
                                     return (

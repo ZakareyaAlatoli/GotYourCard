@@ -7,6 +7,7 @@ export default function Container({ children, visible, color }) {
   return (
     <div
       style={{
+        backdropFilter: "blur(5px)",
         padding: "20px",
         position: "fixed",
         transition: `right ${transitionTime}ms`,

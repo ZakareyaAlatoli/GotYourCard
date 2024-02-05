@@ -11,6 +11,7 @@ export default function AnswerScreen() {
   const [questions, setQuestions] = useState([]);
 
   useSocket(socket, ['get-questions', newQuestions => {
+    setLoading(false);
     setQuestions(newQuestions);
   }]);
 
@@ -38,7 +39,7 @@ export default function AnswerScreen() {
     }
 
   return (
-    <Container visible={visible} color="#FFFF0044">
+    <Container visible={visible} color="#FFFF0088">
       <h1>Answer Phase</h1>
         <Form onSubmit={submit}>
             {

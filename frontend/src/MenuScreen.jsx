@@ -60,7 +60,7 @@ export default function MenuScreen() {
   }
 
   return (
-    <Container visible={visible} color="#0000FF44">
+    <Container visible={visible} color="#0000FF88">
         {username ? <div>{username}</div> : null}
     
         <Form onSubmit={submitName} aria-disabled={!loading}>      

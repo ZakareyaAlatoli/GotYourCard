@@ -13,7 +13,7 @@ export default function MatchScreen() {
     const [roomMembers, setRoomMembers] = useState([]);
     const [matches, setMatches] = useState([]);
 
-    function validateMatchData(){
+    function validateGameData(){
         if(answers.length == 0 || questions.length == 0 || roomMembers == [])
             return;
         setLoading(false);
@@ -52,7 +52,7 @@ export default function MatchScreen() {
     },[])
 
     useEffect(() => {
-        validateMatchData();
+        validateGameData();
     },[answers, questions, roomMembers])
 
     useSocket(socket, 
@@ -80,7 +80,7 @@ export default function MatchScreen() {
     }
 
     return (
-        <Container visible={visible} color="#00FFFF44">
+        <Container visible={visible} color="#00FFFF88">
             <h1>Match Phase</h1>
             <h2>
                 You asked: "{questions?.filter(question => {

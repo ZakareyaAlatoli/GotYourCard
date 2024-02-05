@@ -36,8 +36,10 @@ export default function LobbyScreen() {
     goToScreen();
   }
   return (
-    <Container visible={visible} color="#FF000044">
+    <Container visible={visible} color="#FF000088">
       <h1>Lobby</h1>
+      <h2>Room Code: <span style={{WebkitTextStrokeColor: 'lightgreen'}}>{room? room._id : null}</span></h2>
+      <h2>Current Members</h2>
       <ul>
         {
           roomMembers.map(roomMember => {

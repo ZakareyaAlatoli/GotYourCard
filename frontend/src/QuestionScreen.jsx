@@ -22,10 +22,8 @@ export default function QuestionScreen() {
   }
 
   return (
-    <Container visible={visible} color="#FF00FF44">
+    <Container visible={visible} color="#FF00FF88">
       <h1>Question Phase</h1>
-      <h2>{username}</h2>
-
       <Form onSubmit={submitQuestion}>
         <h3>Ask a question that you can predict your opponents' answers to</h3>
         <input name="question"/>
