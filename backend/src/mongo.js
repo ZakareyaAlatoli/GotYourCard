@@ -320,6 +320,5 @@ module.exports.setResults = async function(roomId){
         }},
         {upsert: true}
     );
-    await module.exports.resetRoom(roomId);
 }
 

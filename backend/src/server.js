@@ -203,10 +203,11 @@ io.on('connection', socket => {
       const {_id} = await mongo.getRoomByUserId(userId);
       let results = await mongo.getResultsByRoomId(_id.toString());
       if(results == null){
-        console.log('Creating new results');
         await mongo.setResults(_id.toString());
       }
-        
+      else{
+        await mongo.resetRoom(_id.toString());
+      }
       results = await mongo.getResultsByRoomId(_id.toString());
       socket.emit('get-results', results);
     }
@@ -214,6 +215,9 @@ io.on('connection', socket => {
       console.error(error);
       socket.emit('error', error);
     }
+  })
+  socket.on('restart-game', () => {
+    console.log("TODO: restart");
   })
 })
 

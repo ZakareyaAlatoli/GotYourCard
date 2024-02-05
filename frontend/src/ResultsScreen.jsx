@@ -16,6 +16,7 @@ export default function ResultsScreen() {
 
     useSocket(socket, 
         ['get-results', newResults => {
+            console.log(newResults);
             setLoading(false);
             setResults(newResults);
         }]

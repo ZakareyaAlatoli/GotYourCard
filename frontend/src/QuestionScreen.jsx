@@ -18,14 +18,13 @@ export default function QuestionScreen() {
   function submitQuestion({question}){
     socket.emit('set-question', userId, question);
     setLoading(true);
-    console.log(question);
   }
 
   return (
     <Container visible={visible} color="#FF00FF88">
       <h1>Question Phase</h1>
+      <h2>Ask a question that you can predict your opponents' answers to</h2>
       <Form onSubmit={submitQuestion}>
-        <h3>Ask a question that you can predict your opponents' answers to</h3>
         <input name="question"/>
         <button type="submit">Submit</button>
       </Form>

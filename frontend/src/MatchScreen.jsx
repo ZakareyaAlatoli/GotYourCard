@@ -28,8 +28,6 @@ export default function MatchScreen() {
         answers.forEach(answer => {
             if(answer.userId != userId){//if not user's answer...
                 answer.answers.forEach(givenAnswer => {
-                    console.log("Mine: ", myQuestionId);
-                    console.log(givenAnswer.questionId);
                     if(givenAnswer.questionId == myQuestionId){
                         newMatches.push({
                             answerId: answer._id,
@@ -41,7 +39,6 @@ export default function MatchScreen() {
             }
         })
         setMatches(newMatches);
-        console.log("Matches", newMatches);
     }
 
     useEffect(() => {
@@ -68,7 +65,6 @@ export default function MatchScreen() {
     );
 
     function submit(values){
-        console.log(values);
         let matches = [];
         Object.entries(values).forEach(([key, value])=>{
             matches.push({
@@ -110,10 +106,12 @@ export default function MatchScreen() {
                                         })
                                     }
                                 </select>
+                                <br />
                             </label>
                         )
                     })
                 }
+                <br />
                 <button type="submit">Submit</button>
             </Form>
         </Container>

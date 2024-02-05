@@ -41,13 +41,14 @@ export default function AnswerScreen() {
   return (
     <Container visible={visible} color="#FFFF0088">
       <h1>Answer Phase</h1>
+      <h2>Answer the questions the other players asked</h2>
         <Form onSubmit={submit}>
             {
                 questions?.map(question => {
                     if(userId != question.userId){
                         return(
                             <>
-                                <label key={question._id}>{question.question}
+                                <label key={question._id}>{question.question}<br />
                                     <input key={question._id} type='text' name={question._id} />
                                 </label>
                                 
@@ -56,6 +57,7 @@ export default function AnswerScreen() {
                     }
                 })
             }
+            <br />
             <button type="submit">Submit</button>
         </Form>
     </Container>

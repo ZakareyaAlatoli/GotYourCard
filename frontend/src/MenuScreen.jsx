@@ -42,16 +42,28 @@ export default function MenuScreen() {
 );
 
   function submitName({username}){
+    if(!username){
+      alert("Name cannot be blank");
+      return;
+    }
     setLoading(true);
     socket.emit('set-name', userId, username);
   }
 
   function submitRoomId({roomId}){
+    if(!username){
+      alert("Name cannot be blank");
+      return;
+    }
     setLoading(true);
     joinRoom(roomId);
   }
 
   function createRoom(){
+    if(!username){
+      alert("Name cannot be blank");
+      return;
+    }
     socket.emit('create-room', userId);
   }
 
