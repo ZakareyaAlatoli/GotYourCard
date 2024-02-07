@@ -6,7 +6,7 @@ import useSocket from "./useSocket";
 import Form from "./Form";
 
 export default function QuestionScreen() {
-  const {userId, username, socket, setLoading} = useContext(AppContext);
+  const {userId, socket, setLoading} = useContext(AppContext);
   const {visible} = useContext(ScreenContext);
   const [question, setQuestion] = useState();
 
@@ -17,6 +17,7 @@ export default function QuestionScreen() {
 
   function submitQuestion({question}){
     socket.emit('set-question', userId, question);
+    socket.emit('refresh', userId);
     setLoading(true);
   }
 

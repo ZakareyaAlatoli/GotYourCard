@@ -6,14 +6,14 @@ import useSocket from "./useSocket";
 import Form from "./Form";
 
 export default function AnswerScreen() {
-  const {userId, username, socket, setLoading} = useContext(AppContext);
-  const {visible} = useContext(ScreenContext);
-  const [questions, setQuestions] = useState([]);
+    const {userId, username, socket, setLoading} = useContext(AppContext);
+    const {visible} = useContext(ScreenContext);
+    const [questions, setQuestions] = useState([]);
 
-  useSocket(socket, ['get-questions', newQuestions => {
-    setLoading(false);
-    setQuestions(newQuestions);
-  }]);
+    useSocket(socket, ['get-questions', newQuestions => {
+        setLoading(false);
+        setQuestions(newQuestions);
+    }]);
 
     useEffect(() => {
         setLoading(true);
@@ -21,6 +21,7 @@ export default function AnswerScreen() {
     },[])
 
     function submit(values){
+        socket.emit('refresh', userId);
         let answers = [];
         let completed = true;
         Object.entries(values).forEach(([key, value])=>{

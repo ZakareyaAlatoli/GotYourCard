@@ -2,6 +2,8 @@ const {MongoClient, ObjectId} = require("mongodb");
 const mongoClient = new MongoClient('mongodb://127.0.0.1/gotyourcard');
 const {Screens} = require('./AppConstants');
 
+const userTimeoutMs = 360_000;
+
 module.exports.generateUserId = async function(){
   await mongoClient.connect();
   const db = mongoClient.db();
@@ -12,8 +14,6 @@ module.exports.generateUserId = async function(){
   
   return record.insertedId;
 }
-
-const userTimeoutMs = 30_000;
 
 module.exports.refreshUserId = async function(userId){
   await mongoClient.connect();

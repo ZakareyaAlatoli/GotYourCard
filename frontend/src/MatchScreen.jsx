@@ -65,6 +65,7 @@ export default function MatchScreen() {
     );
 
     function submit(values){
+        socket.emit('refresh', userId);
         let matches = [];
         Object.entries(values).forEach(([key, value])=>{
             matches.push({

@@ -33,7 +33,7 @@ export default function LobbyScreen() {
 
   function leaveRoom(){
     socket.emit('leave-room', userId);
-    goToScreen();
+    goToScreen(Screens.MENU);
   }
   return (
     <Container visible={visible} color="#FF000088">

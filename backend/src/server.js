@@ -20,6 +20,7 @@ io.on('connection', socket => {
     if(matchedCount == 0){
       const newId = await mongo.generateUserId();
       socket.emit('set-id', newId);
+      socket.emit('set-screen', Screens.MENU);
       return;
     }
     const [user] = await mongo.getUsersById([userId]);
@@ -30,7 +31,7 @@ io.on('connection', socket => {
     if(existingRoom){
       socket.join(existingRoom._id.toString());
       socket.emit('room-players-change', existingRoom);
-      socket.emit('set-screen', existingRoom.phase);
+      socket.emit('set-screen-immediate', existingRoom.phase);
     }
   })
   socket.on('set-name', async (userId, name) => {
@@ -224,7 +225,7 @@ io.on('connection', socket => {
 //TODO: maybe separate this from the game server?
 setInterval(() => {
   console.log('Purging idle accounts...');
-  //mongo.deleteIdleUserIds();
+  mongo.deleteIdleUserIds();
 }, 3_600_000);
 
 server.listen(process.env.PORT || 3000);

@@ -17,9 +17,14 @@ export default function Screen(){
     const transitionTime = 500;
     const {socket} = useContext(AppContext);
 
-    useSocket(socket, ['set-screen', screen => {
-        goToScreen(screen);
-    }]);
+    useSocket(socket, 
+        ['set-screen', screen => {
+            goToScreen(screen);
+        }],
+        ['set-screen-immediate', screen => {
+            setScreen(screen);
+        }],
+    );
 
     function goToScreen(screen) {
         setVisible(false);
