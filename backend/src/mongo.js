@@ -104,6 +104,15 @@ module.exports.removeUserFromRoom = async function(userId){
     });
 }
 
+module.exports.deleteUserGameData = async function(userIds){
+    await mongoClient.connect();
+    const db = mongoClient.db();
+    
+    await db.collection('questions').deleteMany({userId: {$in: userIds}});
+    await db.collection('answers').deleteMany({userId: {$in: userIds}});
+    await db.collection('matches').deleteMany({userId: {$in: userIds}});
+}
+
 module.exports.deleteIdleUserIds = async function(){
   await mongoClient.connect();
   const db = mongoClient.db();
@@ -113,8 +122,9 @@ module.exports.deleteIdleUserIds = async function(){
   const expiredUsers = await cursor.toArray();
 
   expiredUsers.forEach(async expiredUser => {
-    await module.exports.removeUserFromRoom(expiredUser._id);
+    await this.removeUserFromRoom(expiredUser._id);
   });
+  await this.deleteUserGameData(expiredUsers);
   await usersCollection.deleteMany({expireDate: {$lte: date}});
   
 }
@@ -148,10 +158,7 @@ module.exports.setRoomPhase = async function(roomId, phase){
 }
 
 module.exports.startGame = async function(roomId){
-    await mongoClient.connect();
-    const db = mongoClient.db();
-    const roomsCollection = db.collection('rooms');  
-
+    await this.resetRoom(roomId);
     await this.setRoomPhase(roomId, Screens.QUESTION);
 }
 
@@ -160,7 +167,7 @@ module.exports.getQuestionsByRoomId = async function(roomId){
     const db = mongoClient.db();
     const questionsCollection = db.collection('questions');
 
-    const {memberUserIds} = await module.exports.getRoomById(roomId);
+    const {memberUserIds} = await this.getRoomById(roomId);
     const cursor = questionsCollection.find({userId: {$in: memberUserIds}});
     const questions = await cursor.toArray();
 
@@ -188,7 +195,7 @@ module.exports.getAnswersByRoomId = async function(roomId){
     const db = mongoClient.db();
     const answersCollection = db.collection('answers');
 
-    const {memberUserIds} = await module.exports.getRoomById(roomId);
+    const {memberUserIds} = await this.getRoomById(roomId);
     const cursor = answersCollection.find({userId: {$in: memberUserIds}});
     const answers = await cursor.toArray();
 
@@ -214,7 +221,7 @@ module.exports.getMatchesByRoomId = async function(roomId){
     const db = mongoClient.db();
     const matchesCollection = db.collection('matches');
 
-    const {memberUserIds} = await module.exports.getRoomById(roomId);
+    const {memberUserIds} = await this.getRoomById(roomId);
     const cursor = matchesCollection.find({userId: {$in: memberUserIds}});
     const matches = await cursor.toArray();
 
@@ -248,25 +255,16 @@ module.exports.resetRoom = async function(roomId){
     await mongoClient.connect();
     const db = mongoClient.db();
     //question, answers, matches
-    const room = await module.exports.getRoomById(roomId);
-    const ids = room.memberUserIds.map(memberUserId => new ObjectId(memberUserId));
+    const room = await this.getRoomById(roomId);
     
-    await db.collection('questions').deleteMany({
-        userId: {$in: ids}
-    })
-    await db.collection('answers').deleteMany({
-        userId: {$in: ids}
-    })
-    await db.collection('matches').deleteMany({
-        userId: {$in: ids}
-    })
+    await this.deleteUserGameData(room.memberUserIds);
 }
 
 module.exports.setResults = async function(roomId){
     await mongoClient.connect();
     const db = mongoClient.db();
-    const room = await module.exports.getRoomById(roomId);
-    const users = await module.exports.getUsersById(room.memberUserIds.map(id => id.toString()));
+    const room = await this.getRoomById(roomId);
+    const users = await this.getUsersById(room.memberUserIds.map(id => id.toString()));
 
     let results = {};
     users.forEach(user => {
@@ -276,8 +274,8 @@ module.exports.setResults = async function(roomId){
         }
     })
 
-    const questions = await module.exports.getQuestionsByRoomId(roomId);
-    const answers = await module.exports.getAnswersByRoomId(roomId);
+    const questions = await this.getQuestionsByRoomId(roomId);
+    const answers = await this.getAnswersByRoomId(roomId);
     questions.forEach(question => { 
         results[question.userId].question = question.question;
         results[question.userId].answers = [];
@@ -295,7 +293,7 @@ module.exports.setResults = async function(roomId){
             })
         })
     })
-    const matches = await module.exports.getMatchesByRoomId(roomId);
+    const matches = await this.getMatchesByRoomId(roomId);
     matches.forEach(match => {
         //TODO: find out who gave match.answerId
         //match.userId is the person who guessed gave the corresponding answerId

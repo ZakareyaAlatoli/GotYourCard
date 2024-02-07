@@ -55,7 +55,7 @@ export default function ResultsScreen() {
                 })
                 : null
             }
-            <button onClick={() => socket.emit('restart-game', userId)}>Play Again</button>
+            <button onClick={() => socket.emit('start-game', userId)}>Play Again</button>
             <button onClick={() => {socket.emit('leave-room', userId)}}>Leave Room</button>
         </Container>
     );

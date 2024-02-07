@@ -110,7 +110,7 @@ io.on('connection', socket => {
       const roomId = user?.roomId;
       if(roomId){
         await mongo.startGame(roomId);
-        io.to(roomId.toString()).emit('question-phase');
+        io.to(roomId.toString()).emit('set-screen', Screens.QUESTION);
       }
     }
     catch(error){
@@ -118,6 +118,7 @@ io.on('connection', socket => {
       socket.emit('error', error);
     }
   })
+
   socket.on('set-question', async (userId, question) => {
     try{
       const askedQuestion = await mongo.setQuestion(userId, question);
@@ -202,9 +203,13 @@ io.on('connection', socket => {
   socket.on('get-results', async (userId) => {
     try{
       const {_id} = await mongo.getRoomByUserId(userId);
+      const room = await mongo.getRoomByUserId(userId);
       let results = await mongo.getResultsByRoomId(_id.toString());
       if(results == null){
-        await mongo.setResults(_id.toString());
+        if(room.phase == Screens.RESULTS)
+          await mongo.setResults(_id.toString());
+        else 
+          throw('Cannot retrieve results for unfinished game');
       }
       else{
         await mongo.resetRoom(_id.toString());
@@ -216,9 +221,6 @@ io.on('connection', socket => {
       console.error(error);
       socket.emit('error', error);
     }
-  })
-  socket.on('restart-game', () => {
-    console.log("TODO: restart");
   })
 })
 
