@@ -74,6 +74,7 @@ io.on('connection', socket => {
       if(user == null)
         throw('User does not exist');
       await mongo.removeUserFromRoom(userId);
+      await mongo.deleteUserGameData([userId]);
       const roomId = user?.roomId;
       if(roomId){
         socket.leave(roomId.toString());
@@ -109,6 +110,7 @@ io.on('connection', socket => {
         throw('User does not exist');
       const roomId = user?.roomId;
       if(roomId){
+        await mongo.deleteResults(roomId);
         await mongo.startGame(roomId);
         io.to(roomId.toString()).emit('set-screen', Screens.QUESTION);
       }

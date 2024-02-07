@@ -99,6 +99,9 @@ module.exports.removeUserFromRoom = async function(userId){
     await usersCollection.updateOne({_id: new ObjectId(userId)}, {
         $set: {roomId: null}
     });
+    const {memberUserIds} = await this.getRoomById(roomId);
+    if(memberUserIds.length == 0)
+        await this.deleteResults(roomId);
     await roomsCollection.deleteMany({
         memberUserIds: {$size: 0}
     });
@@ -107,10 +110,11 @@ module.exports.removeUserFromRoom = async function(userId){
 module.exports.deleteUserGameData = async function(userIds){
     await mongoClient.connect();
     const db = mongoClient.db();
+    const ids = userIds.map(userId => new ObjectId(userId));
     
-    await db.collection('questions').deleteMany({userId: {$in: userIds}});
-    await db.collection('answers').deleteMany({userId: {$in: userIds}});
-    await db.collection('matches').deleteMany({userId: {$in: userIds}});
+    await db.collection('questions').deleteMany({userId: {$in: ids}});
+    await db.collection('answers').deleteMany({userId: {$in: ids}});
+    await db.collection('matches').deleteMany({userId: {$in: ids}});
 }
 
 module.exports.deleteIdleUserIds = async function(){
@@ -318,5 +322,12 @@ module.exports.setResults = async function(roomId){
         }},
         {upsert: true}
     );
+}
+
+module.exports.deleteResults = async function(roomId){
+    await mongoClient.connect();
+    const db = mongoClient.db();  
+    
+    await db.collection('results').deleteOne({roomId: new ObjectId(roomId)});
 }
 
