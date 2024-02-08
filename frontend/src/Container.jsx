@@ -19,12 +19,15 @@ export default function Container({ children, visible, color }) {
           ${color} 75%,
           ${color.substring(0, 7)}00 100%
         )`,
-        width: "300vw",
+        width: "295vw",
         height: "100vh",
-        right: visible ? "-100vw" : "300vw"
+        right: visible ? "-100vw" : "295vw"
       }}
     >
-      {children}
+      <div style={{width: '100vw', left: '100vw', position: 'relative'}}>
+        {children}
+      </div>
+
     </div>
   );
 }

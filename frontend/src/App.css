@@ -31,8 +31,11 @@ input {
 }
 
 ul {
-  width: 290vw;
-  list-style-type: none;
+  position: relative;
+  left: 32.5vw;
+  text-align: center;
+  width: 25vw;
+  list-style-type: circle;
 }
 
 body {
