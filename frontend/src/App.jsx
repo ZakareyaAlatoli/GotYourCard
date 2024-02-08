@@ -3,13 +3,13 @@ import {io} from 'socket.io-client'
 import './App.css'
 import Screen from "./Screen";
 import LoadingIcon from "./LoadingIcon";
-import useSocket from "./useSocket";
+import { Screens } from "./AppConstants";
 
 export const AppContext = createContext();
 
 export default function App() {
   //TODO: change to use env var
-  const [socket, setSocket] = useState(io('ws://192.168.1.231:3000'));
+  const [socket, setSocket] = useState(io(import.meta.env.VITE_GAME_SERVER));
   const [userId, setUserId] = useState(localStorage.getItem('userId'));
   const [username, setUsername] = useState();
   const [room, setRoom] = useState({});

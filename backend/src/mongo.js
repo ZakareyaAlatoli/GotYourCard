@@ -1,15 +1,16 @@
 const {MongoClient, ObjectId} = require("mongodb");
-const mongoClient = new MongoClient('mongodb://127.0.0.1/gotyourcard');
+require('dotenv').config();
+const mongoClient = new MongoClient(process.env.MONGODB_URL);
 const {Screens} = require('./AppConstants');
 
-const userTimeoutMs = 360_000;
+const userTimeoutMs = 600_000;
 
 module.exports.generateUserId = async function(){
   await mongoClient.connect();
   const db = mongoClient.db();
   const usersCollection = db.collection('users');
   let expireDate = new Date();
-  expireDate.setSeconds(expireDate.getMilliseconds + userTimeoutMs);
+  expireDate.setMilliseconds(expireDate.getMilliseconds + userTimeoutMs);
   const record = await usersCollection.insertOne({expireDate: expireDate});
   
   return record.insertedId;
@@ -20,7 +21,7 @@ module.exports.refreshUserId = async function(userId){
   const db = mongoClient.db();
   const usersCollection = db.collection('users');
   let expireDate = new Date();
-  expireDate.setSeconds(expireDate.getMilliseconds() + userTimeoutMs);
+  expireDate.setMilliseconds(expireDate.getMilliseconds() + userTimeoutMs);
   const record = await usersCollection.updateOne({_id: new ObjectId(userId)},
   {$set: {expireDate: expireDate}});
   
@@ -110,11 +111,12 @@ module.exports.removeUserFromRoom = async function(userId){
 module.exports.deleteUserGameData = async function(userIds){
     await mongoClient.connect();
     const db = mongoClient.db();
-    const ids = userIds.map(userId => new ObjectId(userId));
+    if(userIds.some(userId => typeof(userId) == 'string'))
+        userIds = userIds.map(userId => new ObjectId(userId));
     
-    await db.collection('questions').deleteMany({userId: {$in: ids}});
-    await db.collection('answers').deleteMany({userId: {$in: ids}});
-    await db.collection('matches').deleteMany({userId: {$in: ids}});
+    await db.collection('questions').deleteMany({userId: {$in: userIds}});
+    await db.collection('answers').deleteMany({userId: {$in: userIds}});
+    await db.collection('matches').deleteMany({userId: {$in: userIds}});
 }
 
 module.exports.deleteIdleUserIds = async function(){

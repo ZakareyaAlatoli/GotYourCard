@@ -1,11 +1,13 @@
 const { createServer } = require('http');
-const { Server } = require('socket.io');
 const mongo = require('./mongo');
 const {Screens} = require('./AppConstants');
 
 const server = createServer();
-const io = new Server(server, {
-  cors: '*'
+const io = require('socket.io')(server, {
+  cors: {
+    origin: process.env.CLIENT_ORIGIN,
+    methods: ["GET", "POST"]
+  }
 });
 
 //TODO: should userId be validated every time a socket message is sent?
@@ -226,10 +228,16 @@ io.on('connection', socket => {
   })
 })
 
+
 //TODO: maybe separate this from the game server?
-setInterval(() => {
+setInterval(async () => {
   console.log('Purging idle accounts...');
-  mongo.deleteIdleUserIds();
+  try{
+    await mongo.deleteIdleUserIds();
+  }
+  catch(error){
+    console.error(error);
+  }
 }, 3_600_000);
 
 server.listen(process.env.PORT || 3000);
