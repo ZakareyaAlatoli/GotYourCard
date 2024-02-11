@@ -6,7 +6,7 @@ import useSocket from "./useSocket";
 import Form from "./Form";
 
 export default function AnswerScreen() {
-    const {userId, username, socket, setLoading} = useContext(AppContext);
+    const {userId, setMessage, socket, setLoading} = useContext(AppContext);
     const {visible} = useContext(ScreenContext);
     const [questions, setQuestions] = useState([]);
 
@@ -26,7 +26,7 @@ export default function AnswerScreen() {
         let completed = true;
         Object.entries(values).forEach(([key, value])=>{
             if(!value){
-                alert('You must answer all questions!');
+                setMessage('You must answer all questions!');
                 completed = false;
                 return;
             }
@@ -40,7 +40,7 @@ export default function AnswerScreen() {
     }
 
   return (
-    <Container visible={visible} color="#FFFF0088">
+    <Container visible={visible} color="#88880055">
       <h1>Answer Phase</h1>
       <h2>Answer the questions the other players asked</h2>
         <Form onSubmit={submit}>

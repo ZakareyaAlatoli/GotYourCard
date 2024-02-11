@@ -77,7 +77,7 @@ export default function MatchScreen() {
     }
 
     return (
-        <Container visible={visible} color="#00FFFF88">
+        <Container visible={visible} color="#00888855">
             <h1>Match Phase</h1>
             <h2>
                 You asked: "{questions?.filter(question => {

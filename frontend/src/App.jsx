@@ -14,6 +14,8 @@ export default function App() {
   const [username, setUsername] = useState();
   const [room, setRoom] = useState({});
   const [loading, setLoading] = useState(false);
+  const [messageOpacity, setMessageOpacity] = useState(0);
+  const [message, setMessage] = useState();
 
   useEffect(() => {
     if(!userId){
@@ -36,11 +38,23 @@ export default function App() {
     socket.on('error', error => {
       setLoading(false);
       console.error(error);
+      if(typeof(error) == 'string')
+        setMessage(error);
+      else 
+        setMessage('An error has occurred');
     })
     socket.on('set-name', name => {
       setUsername(name);
     })
   },[]);
+
+
+  useEffect(() => {
+    setMessageOpacity(1);
+    setTimeout(() => {
+      setMessageOpacity(0);
+    },4000);
+  },[message]);
 
   return (
     <AppContext.Provider value={
@@ -52,10 +66,31 @@ export default function App() {
         setLoading,
         setUsername,
         room,
-        setRoom
+        setRoom,
+        setMessage
       }
     }>
       {loading?<LoadingIcon />:null}
+      <div style={{ 
+        opacity: messageOpacity,
+        transition: 'opacity 0.3s',
+        position: "fixed", 
+        zIndex: 2,
+        backgroundColor: 'white',
+        borderRadius: '5px',
+        margin: 'auto',
+        left: '10%',
+        top: '10%',
+        width: '80%',
+        textAlign: 'center',
+        fontWeight: '400',
+        padding: message ? '5px' : '0',
+        color: 'black',
+        pointerEvents: 'none'
+      }}
+      >
+        {message}
+      </div>
       <img
         width="100%"
         style={{ position: "absolute" }}

@@ -1,10 +1,10 @@
 :root {
   font-family: Arial;
-  font-size: 1em;
-  font-weight: 800;
+  font-size: 1.1em;
+  font-weight: 400;
 
   color-scheme: light dark;
-  color: black;
+  color: white;
   background-color: #242424;
 
   font-synthesis: none;
@@ -28,6 +28,7 @@ input {
   width: 250px;
   font-size: 1em;
   margin: 0.1em;
+  text-align: center;
 }
 
 ul {

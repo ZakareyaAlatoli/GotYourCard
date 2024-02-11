@@ -14,7 +14,8 @@ export default function MenuScreen() {
     socket, 
     setRoom,
     loading,
-    setLoading
+    setLoading,
+    setMessage
   } = useContext(AppContext);
 
   const {goToScreen, visible} = useContext(ScreenContext);
@@ -43,16 +44,18 @@ export default function MenuScreen() {
 
   function submitName({username}){
     if(!username){
-      alert("Name cannot be blank");
+      setMessage('Name cannot be blank');
       return;
     }
     setLoading(true);
+    socket.emit('refresh', userId);
     socket.emit('set-name', userId, username);
+    setMessage(`Changing name to "${username}"`);
   }
 
   function submitRoomId({roomId}){
     if(!username){
-      alert("Name cannot be blank");
+      setMessage('Name cannot be blank');
       return;
     }
     setLoading(true);
@@ -61,7 +64,7 @@ export default function MenuScreen() {
 
   function createRoom(){
     if(!username){
-      alert("Name cannot be blank");
+      setMessage('Name cannot be blank');
       return;
     }
     socket.emit('create-room', userId);
@@ -72,21 +75,33 @@ export default function MenuScreen() {
   }
 
   return (
-    <Container visible={visible} color="#0000FF88">
-        {username ? <div>{username}</div> : null}
-    
+    <Container visible={visible} color="#00008855">    
         <Form onSubmit={submitName} aria-disabled={!loading}>      
-            <input type="text" name="username"/>
-            <button type="submit">Set Name</button>
+            <input 
+              type="text" 
+              name="username" 
+              placeholder={username ? username : "Enter your name"}
+              title="Change name"
+              style={{
+                backgroundColor: 'black'
+              }}
+            />
         </Form>
-        <button onClick={createRoom}>Create Game</button>
-        {joinFormOpen ?
-            <Form onSubmit={submitRoomId} aria-disabled={!loading}>
-                <input type="text" name="roomId"/>
-                <button type="submit">Enter Room Code</button>
-            </Form>
-            : <button onClick={() => setJoinFormOpen(true)}>Join Game</button> 
-        }
+        {username ? 
+          <>
+            <button onClick={createRoom}>Create Game</button>
+            {joinFormOpen ?
+              <Form onSubmit={submitRoomId} aria-disabled={!loading}>
+                  <input 
+                    type="text" 
+                    name="roomId" 
+                    placeholder="Enter room code to join" 
+                  />
+              </Form>
+              : <button onClick={() => setJoinFormOpen(true)}>Join Game</button> 
+            }
+          </>
+        : null}
     </Container>
   );
 }
