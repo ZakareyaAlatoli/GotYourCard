@@ -15,7 +15,7 @@ export default function MenuScreen() {
     setRoom,
     loading,
     setLoading,
-    setMessage
+    displayMessage
   } = useContext(AppContext);
 
   const {goToScreen, visible} = useContext(ScreenContext);
@@ -44,18 +44,18 @@ export default function MenuScreen() {
 
   function submitName({username}){
     if(!username){
-      setMessage('Name cannot be blank');
+      displayMessage('Name cannot be blank');
       return;
     }
     setLoading(true);
     socket.emit('refresh', userId);
     socket.emit('set-name', userId, username);
-    setMessage(`Changing name to "${username}"`);
+    displayMessage(`Changing name to "${username}"`);
   }
 
   function submitRoomId({roomId}){
     if(!username){
-      setMessage('Name cannot be blank');
+      displayMessage('Name cannot be blank');
       return;
     }
     setLoading(true);
@@ -64,7 +64,7 @@ export default function MenuScreen() {
 
   function createRoom(){
     if(!username){
-      setMessage('Name cannot be blank');
+      displayMessage('Name cannot be blank');
       return;
     }
     socket.emit('create-room', userId);

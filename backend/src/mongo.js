@@ -41,7 +41,11 @@ module.exports.createRoom = async function(userId){
     await mongoClient.connect();
     const db = mongoClient.db();
     const roomsCollection = db.collection('rooms');
-    const {insertedId} = await roomsCollection.insertOne({phase: Screens.LOBBY, memberUserIds: [new ObjectId(userId)]});
+    const {insertedId} = await roomsCollection.insertOne({
+        phase: Screens.LOBBY, 
+        memberUserIds: [new ObjectId(userId)],
+        owner: new ObjectId(userId)
+    });
     const usersCollection = db.collection('users');
     await usersCollection.updateOne({_id: new ObjectId(userId)}, 
     { $set: {roomId: insertedId}});
@@ -103,6 +107,11 @@ module.exports.removeUserFromRoom = async function(userId){
     const {memberUserIds} = await this.getRoomById(roomId);
     if(memberUserIds.length == 0)
         await this.deleteResults(roomId);
+    else if(!memberUserIds.includes(new ObjectId(userId))){
+        await roomsCollection.updateOne({_id: new ObjectId(roomId)}, {
+            $set: { owner: (memberUserIds[0])}
+        });     
+    }
     await roomsCollection.deleteMany({
         memberUserIds: {$size: 0}
     });

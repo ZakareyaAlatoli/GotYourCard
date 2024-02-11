@@ -6,7 +6,7 @@ import useSocket from "./useSocket";
 import Form from "./Form";
 
 export default function MatchScreen() {
-    const {userId, username, socket, setLoading, room} = useContext(AppContext);
+    const {userId, socket, setLoading, room, displayMessage} = useContext(AppContext);
     const {visible} = useContext(ScreenContext);
     const [answers, setAnswers] = useState([]);
     const [questions, setQuestions] = useState([]);
@@ -62,6 +62,10 @@ export default function MatchScreen() {
         ['get-users', newRoomMembers => {
             setRoomMembers(newRoomMembers);
         }],
+        ['set-matches', () => {
+            displayMessage('Matches submitted');
+            setLoading(false);
+        }]
     );
 
     function submit(values){
@@ -74,6 +78,7 @@ export default function MatchScreen() {
             });
         })
         socket.emit('set-matches', userId, matches);
+        setLoading(true);
     }
 
     return (

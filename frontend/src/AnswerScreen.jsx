@@ -6,14 +6,20 @@ import useSocket from "./useSocket";
 import Form from "./Form";
 
 export default function AnswerScreen() {
-    const {userId, setMessage, socket, setLoading} = useContext(AppContext);
+    const {userId, displayMessage, socket, setLoading} = useContext(AppContext);
     const {visible} = useContext(ScreenContext);
     const [questions, setQuestions] = useState([]);
 
-    useSocket(socket, ['get-questions', newQuestions => {
-        setLoading(false);
-        setQuestions(newQuestions);
-    }]);
+    useSocket(socket, 
+        ['get-questions', newQuestions => {
+            setLoading(false);
+            setQuestions(newQuestions);
+        }],
+        ['set-answers', () => {
+            displayMessage('Answers submitted');
+            setLoading(false);
+        }]
+    );
 
     useEffect(() => {
         setLoading(true);
@@ -26,7 +32,7 @@ export default function AnswerScreen() {
         let completed = true;
         Object.entries(values).forEach(([key, value])=>{
             if(!value){
-                setMessage('You must answer all questions!');
+                displayMessage('You must answer all questions!');
                 completed = false;
                 return;
             }
@@ -35,8 +41,10 @@ export default function AnswerScreen() {
                 answer: value
             });
         })
-        if(completed)
+        if(completed){
             socket.emit('set-answers', userId, answers);
+            setLoading(true);
+        }
     }
 
   return (
@@ -52,7 +60,7 @@ export default function AnswerScreen() {
                                 <label key={question._id}>{question.question}<br />
                                     <input key={question._id} type='text' name={question._id} />
                                 </label>
-                                
+                                <br />
                             </>
                         )
                     }

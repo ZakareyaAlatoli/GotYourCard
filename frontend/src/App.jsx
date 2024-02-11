@@ -16,6 +16,18 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [messageOpacity, setMessageOpacity] = useState(0);
   const [message, setMessage] = useState();
+  var messageTimer;
+
+  function displayMessage(newMessage){
+    setMessage(newMessage);
+    setMessageOpacity(1);
+    if(messageTimer){
+      clearTimeout(messageTimer);
+    }
+    messageTimer = setTimeout(() => {
+      setMessageOpacity(0);
+    },4000);
+  }
 
   useEffect(() => {
     if(!userId){
@@ -39,22 +51,14 @@ export default function App() {
       setLoading(false);
       console.error(error);
       if(typeof(error) == 'string')
-        setMessage(error);
+        displayMessage(error);
       else 
-        setMessage('An error has occurred');
+        displayMessage('An error has occurred');
     })
     socket.on('set-name', name => {
       setUsername(name);
     })
   },[]);
-
-
-  useEffect(() => {
-    setMessageOpacity(1);
-    setTimeout(() => {
-      setMessageOpacity(0);
-    },4000);
-  },[message]);
 
   return (
     <AppContext.Provider value={
@@ -67,7 +71,7 @@ export default function App() {
         setUsername,
         room,
         setRoom,
-        setMessage
+        displayMessage
       }
     }>
       {loading?<LoadingIcon />:null}

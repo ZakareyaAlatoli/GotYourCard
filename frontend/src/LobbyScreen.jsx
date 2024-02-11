@@ -21,6 +21,7 @@ export default function LobbyScreen() {
 
   useEffect(() => {
     socket.emit('get-users', room?.memberUserIds);
+    console.log(room);
   }, []);
 
   useEffect(() => {
@@ -43,7 +44,7 @@ export default function LobbyScreen() {
       <ul>
         {
           roomMembers.map(roomMember => {
-            return <li key={roomMember._id}>{roomMember.name}</li>
+            return <li style={{color: roomMember._id == room.owner ? 'gold': 'white'}} key={roomMember._id}>{roomMember.name}</li>
           })
         }
       </ul>

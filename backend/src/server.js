@@ -107,15 +107,17 @@ io.on('connection', socket => {
   })
   socket.on('start-game', async (userId) => {
     try{
-      const [user] = await mongo.getUsersById([userId]);
-      if(user == null)
-        throw('User does not exist');
-      const roomId = user?.roomId;
-      if(roomId){
-        await mongo.deleteResults(roomId);
-        await mongo.startGame(roomId);
-        io.to(roomId.toString()).emit('set-screen', Screens.QUESTION);
-      }
+      const room = await mongo.getRoomByUserId(userId);
+      if(room == null)
+        throw('User is not in a room');
+      const roomId = room._id;
+      if(room.owner.toString() != userId)
+        throw('Only the room owner can start the game');
+      if(room.memberUserIds.length < 3)
+        throw('At least 3 players are needed to start a game');
+      await mongo.deleteResults(roomId);
+      await mongo.startGame(roomId);
+      io.to(roomId.toString()).emit('set-screen', Screens.QUESTION);
     }
     catch(error){
       console.error(error);
