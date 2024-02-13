@@ -34,7 +34,8 @@ module.exports.setUsername = async function(userId, username){
     const usersCollection = db.collection('users');
     await usersCollection.updateOne({ _id: new ObjectId(userId)},
     {$set: {name: username}});
-    return username;
+    const {name} = await usersCollection.findOne({ _id: new ObjectId(userId)});
+    return name;
 }
 
 module.exports.createRoom = async function(userId){

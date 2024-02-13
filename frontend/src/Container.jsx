@@ -8,8 +8,8 @@ export default function Container({ children, visible, color }) {
     <div
       style={{
         backdropFilter: "blur(7px)",
-        padding: "20px",
         position: "fixed",
+        padding: '20px 0',
         transition: `right ${transitionTime}ms`,
         textAlign: "center",
         backgroundImage: `linear-gradient(
@@ -19,9 +19,9 @@ export default function Container({ children, visible, color }) {
           ${color} 75%,
           ${color.substring(0, 7)}00 100%
         )`,
-        width: "295vw",
+        width: "300vw",
         height: "100vh",
-        right: visible ? "-100vw" : "295vw"
+        right: visible ? "-100vw" : "300vw"
       }}
     >
       <div style={{width: '100vw', left: '100vw', position: 'relative'}}>

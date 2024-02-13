@@ -48,7 +48,7 @@ export default function LobbyScreen() {
           })
         }
       </ul>
-      <button onClick={startGame}>Start Game</button>
+      {userId == room.owner && room.memberUserIds.length >= 3 ? <button onClick={startGame}>Start Game</button>: null}
       <button onClick={leaveRoom}>Leave Room</button>
     </Container>
   );

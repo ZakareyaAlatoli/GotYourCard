@@ -84,7 +84,7 @@ export default function App() {
         borderRadius: '5px',
         margin: 'auto',
         left: '10%',
-        top: '10%',
+        top: '40%',
         width: '80%',
         textAlign: 'center',
         fontWeight: '400',

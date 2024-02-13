@@ -83,7 +83,7 @@ export default function MenuScreen() {
               placeholder={username ? username : "Enter your name"}
               title="Change name"
               style={{
-                backgroundColor: 'black'
+                backgroundColor: 'lightblue'
               }}
             />
         </Form>
@@ -102,6 +102,12 @@ export default function MenuScreen() {
             }
           </>
         : null}
+        <h1>How To Play</h1>
+        <p>
+            Each player asks a question, then everyone answers each other's questions. The goal of the game 
+            is to accurately match which player gave which answer to YOUR question. You get 1 point for each 
+            correct guess. The trick is to ask a question that you think each player will answer differently.
+        </p>
     </Container>
   );
 }
