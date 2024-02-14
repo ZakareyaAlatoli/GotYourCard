@@ -57,7 +57,7 @@ io.on('connection', socket => {
     }
     catch(error){
       console.error(error);
-      socket.emit('error', 'Cannot create room');
+      socket.emit('error', error);
     }
   })
   socket.on('get-users', async userIds => {
@@ -87,7 +87,7 @@ io.on('connection', socket => {
     }
     catch(error){
       console.error(error);
-      socket.emit('error', 'Cannot leave room');
+      socket.emit('error', error);
     }
   })
   socket.on('join-room', async (userId, roomId) => {
@@ -138,7 +138,7 @@ io.on('connection', socket => {
     }
     catch(error){
       console.error(error);
-      socket.emit('error', 'Could not send question');
+      socket.emit('error', error);
     }
   })
   socket.on('get-questions', async (userId) => {

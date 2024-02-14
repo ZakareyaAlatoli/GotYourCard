@@ -53,7 +53,7 @@ export default function App() {
       if(typeof(error) == 'string')
         displayMessage(error);
       else 
-        displayMessage('An error has occurred');
+        displayMessage('An error has occurred. Try refreshing.');
     })
     socket.on('set-name', name => {
       setUsername(name);

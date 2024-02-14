@@ -41,6 +41,9 @@ module.exports.setUsername = async function(userId, username){
 module.exports.createRoom = async function(userId){
     await mongoClient.connect();
     const db = mongoClient.db();
+    const users = this.getUsersById([userId]);
+    if(users.length == 0)
+        throw('User does not exist');
     const roomsCollection = db.collection('rooms');
     const {insertedId} = await roomsCollection.insertOne({
         phase: Screens.LOBBY, 
