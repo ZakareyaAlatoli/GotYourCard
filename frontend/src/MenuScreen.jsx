@@ -43,18 +43,18 @@ export default function MenuScreen() {
 );
 
   function submitName({username}){
-    if(!username){
+    if(!username || !username.trim()){
       displayMessage('Name cannot be blank');
       return;
     }
     setLoading(true);
     socket.emit('refresh', userId);
-    socket.emit('set-name', userId, username);
-    displayMessage(`Changing name to "${username}"`);
+    socket.emit('set-name', userId, username.trim());
+    displayMessage(`Changing name to "${username.trim()}"`);
   }
 
   function submitRoomId({roomId}){
-    if(!username){
+    if(!username || !username.trim()){
       displayMessage('Name cannot be blank');
       return;
     }
@@ -63,7 +63,7 @@ export default function MenuScreen() {
   }
 
   function createRoom(){
-    if(!username){
+    if(!username || !username.trim()){
       displayMessage('Name cannot be blank');
       return;
     }

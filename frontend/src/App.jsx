@@ -3,7 +3,6 @@ import {io} from 'socket.io-client'
 import './App.css'
 import Screen from "./Screen";
 import LoadingIcon from "./LoadingIcon";
-import { Screens } from "./AppConstants";
 
 export const AppContext = createContext();
 
@@ -37,7 +36,7 @@ export default function App() {
     else{
       socket.emit('refresh', userId);
     }
-    socket.on('reconnect', (attempt) => {
+    socket.on('reconnect', () => {
       socket.emit('refresh', userId);
     })
     socket.on('set-id', id => {

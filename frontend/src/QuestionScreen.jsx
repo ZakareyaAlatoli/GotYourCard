@@ -6,7 +6,7 @@ import useSocket from "./useSocket";
 import Form from "./Form";
 
 export default function QuestionScreen() {
-  const {userId, socket, setLoading} = useContext(AppContext);
+  const {userId, socket, setLoading, displayMessage} = useContext(AppContext);
   const {visible} = useContext(ScreenContext);
   const [question, setQuestion] = useState();
 
@@ -16,7 +16,11 @@ export default function QuestionScreen() {
   }])
 
   function submitQuestion({question}){
-    socket.emit('set-question', userId, question);
+    if(!question || !question.trim()){
+      displayMessage('Question cannot be empty!');
+      return;
+    }
+    socket.emit('set-question', userId, question.trim());
     socket.emit('refresh', userId);
     setLoading(true);
   }

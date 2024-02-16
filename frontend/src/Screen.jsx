@@ -12,7 +12,7 @@ import useSocket from "./useSocket";
 export const ScreenContext = createContext();
 
 export default function Screen(){
-    const [screen, setScreen] = useState(Screens.MENU);
+    const [screen, setScreen] = useState();
     const [visible, setVisible] = useState(true);
     const transitionTime = 500;
     const {socket} = useContext(AppContext);

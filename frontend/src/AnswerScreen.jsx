@@ -31,14 +31,14 @@ export default function AnswerScreen() {
         let answers = [];
         let completed = true;
         Object.entries(values).forEach(([key, value])=>{
-            if(!value){
+            if(!value || !value.trim()){
                 displayMessage('You must answer all questions!');
                 completed = false;
                 return;
             }
             answers.push({
                 questionId: key,
-                answer: value
+                answer: value.trim()
             });
         })
         if(completed){

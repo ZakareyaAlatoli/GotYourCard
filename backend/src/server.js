@@ -35,6 +35,9 @@ io.on('connection', socket => {
       socket.emit('room-players-change', existingRoom);
       socket.emit('set-screen-immediate', existingRoom.phase);
     }
+    else{
+      socket.emit('set-screen-immediate', Screens.MENU);
+    }
   })
   socket.on('set-name', async (userId, name) => {
     try{
@@ -92,9 +95,12 @@ io.on('connection', socket => {
   })
   socket.on('join-room', async (userId, roomId) => {
     try{
-      const existingRoom = await mongo.getRoomByUserId(userId);
+      let existingRoom = await mongo.getRoomByUserId(userId);
       if(existingRoom) 
         throw('User is already in a room');
+      existingRoom = await mongo.getRoomById(roomId);
+      if(existingRoom.phase !== Screens.LOBBY && existingRoom.phase !== Screens.RESULTS)
+        throw('Game is already in progress');
       const room = await mongo.joinRoom(userId, roomId);
       socket.join(roomId);
       socket.emit('join-room', room);
